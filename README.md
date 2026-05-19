@@ -98,3 +98,8 @@ Express API ──► MongoDB
 ## Author
 
 Academic / Final Year Project — Student Project Management System (SPMS)
+
+
+
+![Landing page screen shot](image.png)
+![Landing page screen shot](image-1.png)
