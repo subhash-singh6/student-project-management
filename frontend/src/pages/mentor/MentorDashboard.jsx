@@ -1,26 +1,19 @@
 // frontend/src/pages/mentor/MentorDashboard.jsx
+
 import { useState, useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import API from '../../api/axios'
 import toast from 'react-hot-toast'
 
-const NAV_ITEMS = [
-  { icon:'👨‍🎓', label:'My Students',    sub:'View assigned',     path:'/mentor/students', color:'#f59e0b', glow:'rgba(245,158,11,0.25)'  },
-  { icon:'💬',   label:'Give Feedback',  sub:'Review projects',   path:'/mentor/students', color:'#10b981', glow:'rgba(16,185,129,0.25)'  },
-  { icon:'📊',   label:'Progress',       sub:'Track performance', path:'/mentor/students', color:'#818cf8', glow:'rgba(129,140,248,0.25)' },
-  { icon:'📅',   label:'Meetings',       sub:'Plan sessions',     path:'/mentor/meetings', color:'#22d3ee', glow:'rgba(34,211,238,0.25)'  },
-]
-
 export default function MentorDashboard() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
-  const [stats,         setStats]         = useState({ students:0, projects:0, notifications:0 })
+  const [stats, setStats] = useState({ students: 0, projects: 0, notifications: 0 })
   const [notifications, setNotifications] = useState([])
-  const [students,      setStudents]      = useState([])
-  const [loading,       setLoading]       = useState(true)
-  const [time,          setTime]          = useState(new Date())
-  const [menuOpen,      setMenuOpen]      = useState(false)
+  const [students, setStudents] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [time, setTime] = useState(new Date())
 
   useEffect(() => {
     fetchData()
@@ -35,15 +28,18 @@ export default function MentorDashboard() {
         API.get('/notifications'),
       ])
       const studentList = mentorRes.data.students || []
-      setStudents(studentList.slice(0, 5))
+      setStudents(studentList.slice(0, 4))
       setStats({
-        students:      studentList.length,
-        projects:      user?.assignedProjects?.length || 0,
+        students: studentList.length,
+        projects: user?.assignedProjects?.length || 0,
         notifications: notifRes.data.unreadCount || 0,
       })
-      setNotifications(notifRes.data.notifications?.slice(0, 4) || [])
-    } catch (e) { console.log(e.message) }
-    finally { setLoading(false) }
+      setNotifications(notifRes.data.notifications?.slice(0, 3) || [])
+    } catch (e) {
+      console.log(e.message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const greeting = () => {
@@ -53,285 +49,157 @@ export default function MentorDashboard() {
     return 'Good Evening'
   }
 
+  const navItems = [
+    { icon: '👨‍🎓', label: 'My Students',      sub: 'View assigned',       path: '/mentor/students', color: '#6366f1', glow: 'rgba(99,102,241,0.3)' },
+    { icon: '📅',   label: 'Schedule Meeting', sub: 'Plan a session',      path: '/mentor/meetings', color: '#22d3ee', glow: 'rgba(34,211,238,0.3)' },
+    { icon: '💬',   label: 'Give Feedback',    sub: 'Review projects',     path: '/mentor/students', color: '#10b981', glow: 'rgba(16,185,129,0.3)' },
+    { icon: '📊',   label: 'Progress',         sub: 'Track performance',   path: '/mentor/students', color: '#a78bfa', glow: 'rgba(167,139,250,0.3)' },
+  ]
+
   if (loading) return (
-    <div className="min-h-screen bg-[#060A12] flex flex-col items-center justify-center gap-4">
-      <div className="h-11 w-11 rounded-full border-2 border-amber-500/20 border-t-amber-500 animate-spin" />
-      <p className="text-sm text-slate-500">Loading...</p>
+    <div style={{ minHeight:'100vh',background:'#070b14',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:16 }}>
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+      <div style={{ width:48,height:48,border:'3px solid rgba(34,211,238,0.2)',borderTop:'3px solid #22d3ee',borderRadius:'50%',animation:'spin 1s linear infinite' }} />
+      <p style={{ color:'#94a3b8',fontFamily:'sans-serif' }}>Loading...</p>
     </div>
   )
 
   return (
-    <div className="min-h-screen bg-[#060A12] overflow-x-hidden" style={{ fontFamily:"'DM Sans',sans-serif" }}>
+    <div style={{ minHeight:'100vh',background:'#070b14',fontFamily:"'DM Sans',sans-serif",overflowX:'hidden' }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Sans:wght@300;400;500;600&display=swap');
-        @keyframes fadeUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes float  { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)} }
-        @keyframes pulse  { 0%,100%{opacity:1} 50%{opacity:0.4} }
-        .fade1{animation:fadeUp 0.5s ease both}
-        .fade2{animation:fadeUp 0.5s ease 0.10s both}
-        .fade3{animation:fadeUp 0.5s ease 0.18s both}
-        .fade4{animation:fadeUp 0.5s ease 0.26s both}
-        .nav-card{transition:transform 0.22s ease,box-shadow 0.22s ease}
-        .nav-card:hover{transform:translateY(-4px);box-shadow:0 20px 48px rgba(0,0,0,0.5)}
-        .stat-card{transition:transform 0.18s ease}
-        .stat-card:hover{transform:translateY(-3px)}
-        .stu-row{transition:background 0.15s}
-        .stu-row:hover{background:rgba(255,255,255,0.04) !important}
-        .mobile-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:40;backdrop-filter:blur(4px)}
-        .mobile-drawer{position:fixed;top:0;right:0;bottom:0;width:80%;max-width:300px;background:#0d1421;border-left:1px solid rgba(255,255,255,0.08);z-index:50;padding:24px;overflow-y:auto}
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap');
+        @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+        @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+        .nav-card:hover{transform:translateY(-6px) !important;box-shadow:0 20px 40px rgba(0,0,0,0.5) !important;}
+        .stat-card:hover{transform:translateY(-3px) !important;}
+        .logout-btn:hover{background:rgba(239,68,68,0.25) !important;}
       `}</style>
 
-      {/* Ambient blobs */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div style={{ position:'absolute', top:-250, left:-250, width:600, height:600, borderRadius:'50%', background:'radial-gradient(circle,rgba(245,158,11,0.06),transparent 70%)' }} />
-        <div style={{ position:'absolute', bottom:-200, right:-200, width:500, height:500, borderRadius:'50%', background:'radial-gradient(circle,rgba(99,102,241,0.05),transparent 70%)' }} />
-      </div>
+      {/* BG blobs */}
+      <div style={{ position:'fixed',top:-300,right:-300,width:700,height:700,background:'radial-gradient(circle,rgba(34,211,238,0.06) 0%,transparent 70%)',borderRadius:'50%',pointerEvents:'none',zIndex:0 }} />
+      <div style={{ position:'fixed',bottom:-200,left:-200,width:500,height:500,background:'radial-gradient(circle,rgba(99,102,241,0.05) 0%,transparent 70%)',borderRadius:'50%',pointerEvents:'none',zIndex:0 }} />
 
-      {/* Mobile drawer */}
-      {menuOpen && (
-        <>
-          <div className="mobile-overlay" onClick={() => setMenuOpen(false)} />
-          <div className="mobile-drawer">
-            <div className="flex items-center justify-between mb-8">
-              <div className="font-bold text-white text-lg" style={{ fontFamily:'Syne,sans-serif' }}>Menu</div>
-              <button onClick={() => setMenuOpen(false)} className="text-slate-500 hover:text-white text-xl">✕</button>
-            </div>
-            <div className="flex flex-col gap-2">
-              {NAV_ITEMS.map(item => (
-                <button
-                  key={item.label}
-                  onClick={() => { navigate(item.path); setMenuOpen(false) }}
-                  className="flex items-center gap-3 rounded-xl border border-white/6 bg-white/3 p-4 text-left hover:bg-white/6 transition-colors"
-                >
-                  <span className="text-xl">{item.icon}</span>
-                  <div>
-                    <div className="font-semibold text-white text-sm">{item.label}</div>
-                    <div className="text-xs text-slate-600">{item.sub}</div>
-                  </div>
-                </button>
-              ))}
-              <button
-                onClick={() => { logout(); navigate('/login'); toast.success('Logged out!') }}
-                className="mt-4 flex items-center gap-3 rounded-xl border border-red-500/25 bg-red-500/10 p-4 text-left"
-              >
-                <span className="text-xl">🚪</span>
-                <span className="font-semibold text-red-400 text-sm">Logout</span>
-              </button>
-            </div>
-          </div>
-        </>
-      )}
+      <div style={{ maxWidth:1100,margin:'0 auto',padding:'32px 24px',position:'relative',zIndex:1 }}>
 
-      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-
-        {/* ── NAVBAR ── */}
-        <div className="flex items-center justify-between mb-8 fade1">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 text-xl shadow-lg shadow-amber-500/30 flex-shrink-0">
-              🧑‍💼
-            </div>
+        {/* NAVBAR */}
+        <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:40,animation:'fadeUp 0.5s ease' }}>
+          <div style={{ display:'flex',alignItems:'center',gap:14 }}>
+            <div style={{ width:46,height:46,background:'linear-gradient(135deg,#22d3ee,#6366f1)',borderRadius:14,display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,boxShadow:'0 0 24px rgba(34,211,238,0.4)' }}>🧑‍💼</div>
             <div>
-              <div className="font-bold text-white text-lg tracking-wide" style={{ fontFamily:'Syne,sans-serif' }}>SPMS</div>
-              <div className="text-[10px] uppercase tracking-[0.2em] text-slate-600">Mentor Portal</div>
+              <div style={{ color:'#f1f5f9',fontFamily:'Syne,sans-serif',fontWeight:600,fontSize:18,letterSpacing:'-0.5px' }}>SPMS</div>
+              <div style={{ color:'#475569',fontSize:11,letterSpacing:1,textTransform:'uppercase' }}>Mentor Portal</div>
             </div>
           </div>
-
-          {/* Desktop */}
-          <div className="hidden sm:flex items-center gap-2.5">
-            <div className="flex items-center gap-1.5 rounded-xl border border-white/7 bg-white/3 px-3 py-2 text-xs text-slate-500">
-              🕐 {time.toLocaleTimeString('en-IN',{ hour:'2-digit', minute:'2-digit' })}
+          <div style={{ display:'flex',alignItems:'center',gap:10 }}>
+            <div style={{ background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.07)',borderRadius:12,padding:'8px 14px',color:'#64748b',fontSize:12 }}>
+              🕐 {time.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}
             </div>
-            <div className="relative">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/7 bg-white/3 text-base cursor-pointer hover:bg-white/6 transition-colors">🔔</div>
-              {stats.notifications > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">{stats.notifications}</span>
-              )}
+            <div style={{ position:'relative' }}>
+              <div style={{ width:40,height:40,background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.07)',borderRadius:12,display:'flex',alignItems:'center',justifyContent:'center',fontSize:16,cursor:'pointer' }}>🔔</div>
+              {stats.notifications>0&&<div style={{ position:'absolute',top:-4,right:-4,background:'#ef4444',color:'white',borderRadius:'50%',width:18,height:18,fontSize:10,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700 }}>{stats.notifications}</div>}
             </div>
-            <button
-              onClick={() => { logout(); navigate('/login'); toast.success('Logged out!') }}
-              className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-2 text-xs font-bold text-red-400 hover:bg-red-500/20 transition-colors"
-              style={{ fontFamily:'Syne,sans-serif' }}
-            >
-              Logout
-            </button>
-          </div>
-
-          {/* Mobile hamburger */}
-          <div className="flex sm:hidden items-center gap-2">
-            {stats.notifications > 0 && (
-              <div className="relative">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/7 bg-white/3 text-sm">🔔</div>
-                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">{stats.notifications}</span>
-              </div>
-            )}
-            <button
-              onClick={() => setMenuOpen(true)}
-              className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/7 bg-white/3 text-slate-400"
-            >☰</button>
+            <button onClick={()=>{logout();navigate('/login');toast.success('Logged out!')}} className="logout-btn" style={{ background:'rgba(239,68,68,0.12)',border:'1px solid rgba(239,68,68,0.25)',color:'#ef4444',borderRadius:12,padding:'8px 18px',cursor:'pointer',fontFamily:'Syne,sans-serif',fontWeight:700,fontSize:13,transition:'all 0.2s' }}>Logout</button>
           </div>
         </div>
 
-        {/* ── HERO BANNER ── */}
-        <div className="fade2 mb-6 rounded-2xl border border-amber-500/15 bg-gradient-to-br from-amber-500/8 to-orange-500/4 p-5 sm:p-7 relative overflow-hidden">
-          <div style={{ position:'absolute', top:-50, right:-50, width:200, height:200, borderRadius:'50%', background:'radial-gradient(circle,rgba(245,158,11,0.12),transparent 70%)', pointerEvents:'none' }} />
-          <div className="flex flex-wrap items-start justify-between gap-4 relative">
+        {/* HERO */}
+        <div style={{ background:'linear-gradient(135deg,rgba(34,211,238,0.1) 0%,rgba(99,102,241,0.07) 100%)',border:'1px solid rgba(34,211,238,0.2)',borderRadius:24,padding:'32px 36px',marginBottom:24,animation:'fadeUp 0.5s ease 0.1s both',position:'relative',overflow:'hidden' }}>
+          <div style={{ position:'absolute',top:-60,right:-60,width:250,height:250,background:'radial-gradient(circle,rgba(34,211,238,0.12) 0%,transparent 70%)',borderRadius:'50%' }} />
+          <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',flexWrap:'wrap',gap:20,position:'relative' }}>
             <div>
-              <div className="text-xs font-bold uppercase tracking-[0.2em] text-amber-500 mb-2">{greeting()} 👋</div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-white mb-3" style={{ fontFamily:'Syne,sans-serif', letterSpacing:'-1px' }}>
-                {user?.name}
-              </h1>
-              <div className="flex flex-wrap gap-2">
-                {user?.organization && (
-                  <span className="rounded-full border border-white/8 bg-white/5 px-3 py-1 text-xs text-slate-400">🏢 {user.organization}</span>
-                )}
-                {user?.expertise?.slice(0, 3).map(e => (
-                  <span key={e} className="rounded-full border border-amber-500/20 bg-amber-500/8 px-3 py-1 text-xs text-amber-400">⚡ {e}</span>
+              <div style={{ color:'#22d3ee',fontSize:13,fontWeight:600,marginBottom:8,letterSpacing:2,textTransform:'uppercase' }}>{greeting()} 👋</div>
+              <h1 style={{ fontFamily:'Syne,sans-serif',fontSize:36,fontWeight:700,color:'#f1f5f9',margin:0,letterSpacing:'-1.5px',lineHeight:1 }}>{user?.name}</h1>
+              <div style={{ display:'flex',gap:8,marginTop:12,flexWrap:'wrap' }}>
+                {user?.organization&&<span style={{ background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.08)',color:'#94a3b8',padding:'4px 12px',borderRadius:20,fontSize:12 }}>🏢 {user.organization}</span>}
+                {user?.expertise?.slice(0,3).map(e=>(
+                  <span key={e} style={{ background:'rgba(34,211,238,0.08)',border:'1px solid rgba(34,211,238,0.15)',color:'#22d3ee',padding:'4px 12px',borderRadius:20,fontSize:12 }}>⚡ {e}</span>
                 ))}
               </div>
             </div>
-            <div>
-              <div className="text-xs text-slate-600 mb-2 hidden sm:block">
-                {time.toLocaleDateString('en-IN',{ weekday:'long', day:'numeric', month:'long' })}
-              </div>
-              <div className="rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 text-xs font-semibold text-amber-400">
+            <div style={{ textAlign:'right' }}>
+              <div style={{ color:'#475569',fontSize:12,marginBottom:8 }}>{time.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'})}</div>
+              <div style={{ background:'rgba(34,211,238,0.12)',border:'1px solid rgba(34,211,238,0.25)',color:'#22d3ee',padding:'8px 18px',borderRadius:20,fontSize:13,fontWeight:600 }}>
                 🧑‍💼 Active Mentor
               </div>
             </div>
           </div>
         </div>
 
-        {/* ── STATS ── */}
-        <div className="fade3 grid grid-cols-3 gap-3 sm:gap-4 mb-8">
+        {/* STATS */}
+        <div style={{ display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:14,marginBottom:24,animation:'fadeUp 0.5s ease 0.2s both' }}>
           {[
-            { label:'Students',      value:stats.students,      icon:'👨‍🎓', color:'text-amber-400',   border:'border-amber-500/20',   bg:'bg-amber-500/8'   },
-            { label:'Projects',      value:stats.projects,      icon:'📋',   color:'text-emerald-400', border:'border-emerald-500/20', bg:'bg-emerald-500/8' },
-            { label:'Notifications', value:stats.notifications, icon:'🔔',   color:'text-indigo-400',  border:'border-indigo-500/20',  bg:'bg-indigo-500/8'  },
-          ].map(s => (
-            <div key={s.label} className={`stat-card rounded-2xl border ${s.border} ${s.bg} p-4 sm:p-5 cursor-default`}>
-              <div className="text-xl sm:text-2xl mb-2">{s.icon}</div>
-              <div className={`text-2xl sm:text-3xl font-bold ${s.color} mb-1`} style={{ fontFamily:'Syne,sans-serif' }}>{s.value}</div>
-              <div className="text-[10px] sm:text-xs text-slate-600 uppercase tracking-wider">{s.label}</div>
+            { label:'Assigned Students', value:stats.students,      icon:'👨‍🎓', color:'#6366f1', bg:'rgba(99,102,241,0.1)',  border:'rgba(99,102,241,0.2)' },
+            { label:'Active Projects',   value:stats.projects,      icon:'📋',   color:'#22d3ee', bg:'rgba(34,211,238,0.1)',  border:'rgba(34,211,238,0.2)' },
+            { label:'Unread Notifs',     value:stats.notifications, icon:'🔔',   color:'#f59e0b', bg:'rgba(245,158,11,0.1)', border:'rgba(245,158,11,0.2)' },
+          ].map(s=>(
+            <div key={s.label} className="stat-card" style={{ background:s.bg,border:`1px solid ${s.border}`,borderRadius:18,padding:'22px 18px',transition:'transform 0.2s',cursor:'default' }}>
+              <div style={{ fontSize:24,marginBottom:10 }}>{s.icon}</div>
+              <div style={{ fontSize:28,fontWeight:600,color:s.color,fontFamily:'Syne,sans-serif',lineHeight:1 }}>{s.value}</div>
+              <div style={{ color:'#475569',fontSize:12,marginTop:6 }}>{s.label}</div>
             </div>
           ))}
         </div>
 
-        {/* ── QUICK ACTIONS ── */}
-        <div className="fade3 mb-8">
-          <div className="text-[11px] font-semibold uppercase tracking-widest text-slate-600 mb-4">Quick Actions</div>
-          {/* Mobile: horizontal scroll */}
-          <div className="flex gap-3 overflow-x-auto pb-2 sm:hidden" style={{ scrollbarWidth:'none' }}>
-            {NAV_ITEMS.map(item => (
-              <div
-                key={item.label}
-                onClick={() => navigate(item.path)}
-                className="flex-shrink-0 w-36 rounded-2xl border border-white/6 bg-[#0d1421] p-4 cursor-pointer relative overflow-hidden"
-              >
-                <div style={{ position:'absolute', top:-20, right:-20, width:64, height:64, borderRadius:'50%', background:`radial-gradient(circle,${item.glow},transparent 70%)`, pointerEvents:'none' }} />
-                <div className="text-2xl mb-2">{item.icon}</div>
-                <div className="font-bold text-xs text-white mb-0.5" style={{ fontFamily:'Syne,sans-serif' }}>{item.label}</div>
-                <div className="text-[10px] text-slate-600">{item.sub}</div>
-              </div>
-            ))}
-          </div>
-          {/* Desktop: grid */}
-          <div className="hidden sm:grid grid-cols-2 md:grid-cols-4 gap-3">
-            {NAV_ITEMS.map(item => (
-              <div
-                key={item.label}
-                className="nav-card rounded-2xl border border-white/6 bg-[#0d1421] p-5 cursor-pointer relative overflow-hidden"
-                onClick={() => navigate(item.path)}
-              >
-                <div style={{ position:'absolute', top:-24, right:-24, width:80, height:80, borderRadius:'50%', background:`radial-gradient(circle,${item.glow},transparent 70%)`, pointerEvents:'none' }} />
-                <div className="text-2xl mb-3">{item.icon}</div>
-                <div className="font-bold text-sm text-white mb-1" style={{ fontFamily:'Syne,sans-serif' }}>{item.label}</div>
-                <div className="text-xs text-slate-600">{item.sub}</div>
-                <div className="mt-3 text-xs font-bold flex items-center gap-1" style={{ color:item.color }}>Open →</div>
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* MAIN GRID */}
+        <div style={{ display:'grid',gridTemplateColumns:'1.4fr 1fr',gap:20,animation:'fadeUp 0.5s ease 0.3s both' }}>
 
-        {/* ── MAIN GRID ── */}
-        <div className="fade4 grid grid-cols-1 lg:grid-cols-5 gap-6">
-
-          {/* Assigned Students — 3 cols */}
-          <div className="lg:col-span-3">
-            <div className="flex items-center justify-between mb-4">
-              <div className="text-[11px] font-semibold uppercase tracking-widest text-slate-600">Assigned Students</div>
-              <button onClick={() => navigate('/mentor/students')} className="text-xs font-semibold text-amber-400 hover:text-amber-300 transition-colors">
-                View All →
-              </button>
-            </div>
-            <div className="rounded-2xl border border-white/6 bg-[#0d1421] overflow-hidden">
-              {students.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 gap-3">
-                  <div className="text-4xl opacity-20" style={{ animation:'float 3s ease infinite' }}>👨‍🎓</div>
-                  <p className="text-sm text-slate-600">Koi student assign nahi hua abhi</p>
+          {/* Nav Cards */}
+          <div>
+            <div style={{ color:'#334155',fontSize:11,fontWeight:600,letterSpacing:2,textTransform:'uppercase',marginBottom:14 }}>Quick Actions</div>
+            <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:12 }}>
+              {navItems.map(item=>(
+                <div key={item.label} className="nav-card" onClick={()=>navigate(item.path)} style={{ background:'rgba(15,23,42,0.9)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:20,padding:'22px 18px',cursor:'pointer',transition:'all 0.25s',position:'relative',overflow:'hidden' }}>
+                  <div style={{ position:'absolute',top:-30,right:-30,width:100,height:100,background:`radial-gradient(circle,${item.glow} 0%,transparent 70%)`,borderRadius:'50%' }} />
+                  <div style={{ fontSize:28,marginBottom:14 }}>{item.icon}</div>
+                  <div style={{ color:'#f1f5f9',fontFamily:'Syne,sans-serif',fontWeight:700,fontSize:15,marginBottom:4 }}>{item.label}</div>
+                  <div style={{ color:'#475569',fontSize:12 }}>{item.sub}</div>
+                  <div style={{ marginTop:16,color:item.color,fontSize:12,fontWeight:700,display:'flex',alignItems:'center',gap:4 }}>Go <span>→</span></div>
                 </div>
-              ) : (
-                <div className="divide-y divide-white/4">
-                  {students.map((s, i) => (
-                    <div
-                      key={s._id}
-                      className="stu-row flex items-center justify-between px-5 py-4 cursor-pointer"
-                      onClick={() => navigate('/mentor/students')}
-                    >
-                      <div className="flex items-center gap-3">
-                        {/* Avatar */}
-                        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-orange-500 text-sm font-bold text-white shadow-md shadow-amber-500/20">
-                          {s.name?.charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                          <div className="font-semibold text-sm text-slate-200">{s.name}</div>
-                          <div className="text-xs text-slate-600 mt-0.5">
-                            {s.branch && `${s.branch}`}{s.semester && ` · Sem ${s.semester}`}
-                          </div>
-                        </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Students + Notifications */}
+          <div style={{ display:'flex',flexDirection:'column',gap:14 }}>
+            {/* Assigned Students */}
+            <div style={{ background:'rgba(15,23,42,0.9)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:20,padding:20 }}>
+              <div style={{ color:'#334155',fontSize:11,fontWeight:600,letterSpacing:2,textTransform:'uppercase',marginBottom:14 }}>Assigned Students</div>
+              {students.length===0?(
+                <p style={{ color:'#334155',fontSize:13,textAlign:'center',padding:'20px 0',animation:'float 3s ease infinite' }}>No students assigned yet</p>
+              ):(
+                <div style={{ display:'flex',flexDirection:'column',gap:8 }}>
+                  {students.map(s=>(
+                    <div key={s._id} style={{ display:'flex',alignItems:'center',gap:10,padding:'8px 10px',background:'rgba(255,255,255,0.02)',borderRadius:10 }}>
+                      <div style={{ width:32,height:32,background:'linear-gradient(135deg,#6366f1,#22d3ee)',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontWeight:700,fontSize:13,flexShrink:0 }}>{s.name?.charAt(0).toUpperCase()}</div>
+                      <div>
+                        <div style={{ color:'#e2e8f0',fontSize:13,fontWeight:600 }}>{s.name}</div>
+                        <div style={{ color:'#475569',fontSize:11 }}>{s.branch} • Sem {s.semester}</div>
                       </div>
-                      {/* Enrollment badge */}
-                      {s.enrollmentNumber && (
-                        <span className="hidden sm:block rounded-full border border-white/8 bg-white/4 px-2.5 py-0.5 text-[10px] text-slate-500">
-                          {s.enrollmentNumber}
-                        </span>
-                      )}
                     </div>
                   ))}
                 </div>
               )}
             </div>
-          </div>
 
-          {/* Notifications — 2 cols */}
-          <div className="lg:col-span-2">
-            <div className="text-[11px] font-semibold uppercase tracking-widest text-slate-600 mb-4">Recent Activity</div>
-            <div className="rounded-2xl border border-white/6 bg-[#0d1421] p-5">
-              {notifications.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-10 gap-3">
-                  <div className="text-3xl opacity-20" style={{ animation:'float 3s ease infinite' }}>🔔</div>
-                  <p className="text-sm text-slate-600 text-center">Koi notification nahi</p>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-2">
-                  {notifications.map((n, i) => (
-                    <div
-                      key={n._id}
-                      className="rounded-xl p-3"
-                      style={{ background: n.isRead ? 'rgba(255,255,255,0.02)' : 'rgba(245,158,11,0.05)', border:`1px solid ${n.isRead ? 'rgba(255,255,255,0.04)' : 'rgba(245,158,11,0.15)'}` }}
-                    >
-                      {!n.isRead && <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-500 mb-1.5" style={{ animation:'pulse 2s infinite' }} />}
-                      <div className="text-sm font-semibold text-slate-200">{n.title}</div>
-                      <div className="text-xs text-slate-600 mt-0.5 leading-relaxed">{n.message?.slice(0, 65)}{n.message?.length > 65 ? '...' : ''}</div>
-                    </div>
-                  ))}
-                </div>
+            {/* Notifications */}
+            <div style={{ background:'rgba(15,23,42,0.9)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:20,padding:20,flex:1 }}>
+              <div style={{ color:'#334155',fontSize:11,fontWeight:600,letterSpacing:2,textTransform:'uppercase',marginBottom:14 }}>Recent Activity</div>
+              {notifications.length===0?(
+                <p style={{ color:'#334155',fontSize:13,textAlign:'center',padding:'16px 0' }}>No notifications</p>
+              ):(
+                notifications.map((n,i)=>(
+                  <div key={n._id} style={{ padding:'10px 0',borderBottom:'1px solid rgba(255,255,255,0.04)',animation:`fadeUp 0.4s ease ${i*0.08}s both` }}>
+                    <div style={{ color:'#e2e8f0',fontSize:12,fontWeight:600 }}>{n.title}</div>
+                    <div style={{ color:'#475569',fontSize:11,marginTop:3 }}>{n.message?.slice(0,55)}...</div>
+                  </div>
+                ))
               )}
             </div>
           </div>
         </div>
 
-        <div className="mt-10 text-center text-[11px] text-slate-800 tracking-widest uppercase">
-          SPMS v3.0 — Student Project Management System
-        </div>
+        <div style={{ marginTop:32,textAlign:'center',color:'#1e293b',fontSize:11,letterSpacing:1,animation:'fadeUp 0.5s ease 0.4s both' }}>SPMS v1.0 — Student Project Management System</div>
       </div>
     </div>
   )
