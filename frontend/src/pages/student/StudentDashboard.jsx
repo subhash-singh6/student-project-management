@@ -50,142 +50,195 @@ export default function StudentDashboard() {
   }
 
   const navItems = [
-    { icon: '📁', label: 'My Projects',   sub: 'Create & manage',    path: '/student/projects', color: '#6366f1', glow: 'rgba(99,102,241,0.3)' },
-    { icon: '👥', label: 'My Team',       sub: 'Collaborate',        path: '/student/team',     color: '#22d3ee', glow: 'rgba(34,211,238,0.3)' },
-    { icon: '💬', label: 'Team Chat',     sub: 'Real-time messages', path: '/student/chat',     color: '#a78bfa', glow: 'rgba(167,139,250,0.3)' },
-    { icon: '📋', label: 'Kanban Board',  sub: 'Task management',    path: '/student/kanban',   color: '#818cf8', glow: 'rgba(129,140,248,0.3)' },
-    { icon: '🎓', label: 'Assign Teacher', sub: 'Subject & mentor', path: '/student/assign-teacher', color: '#f59e0b', glow: 'rgba(245,158,11,0.3)' },
-    { icon: '📊', label: 'Analytics',     sub: 'Charts & insights',  path: '/analytics',        color: '#10b981', glow: 'rgba(16,185,129,0.3)' },
-    { icon: '🏆', label: 'Leaderboard',   sub: 'Rankings & badges',  path: '/leaderboard',      color: '#ec4899', glow: 'rgba(236,72,153,0.3)' },
+    { icon: '📁', label: 'My Projects',   sub: 'View/Create projects',    path: '/student/projects', color: 'text-teal-400' },
+    { icon: '👥', label: 'My Team',       sub: 'Work with teammates',     path: '/student/team',     color: 'text-emerald-400' },
+    { icon: '💬', label: 'Team Chat',     sub: 'Group conversation',      path: '/student/chat',     color: 'text-cyan-400' },
+    { icon: '📋', label: 'Kanban Board',  sub: 'Organize your tasks',     path: '/student/kanban',   color: 'text-blue-400' },
+    { icon: '👨‍🏫', label: 'Assign Mentor',sub: 'Choose a guide',          path: '/student/assign-teacher', color: 'text-sky-400' },
+    { icon: '📊', label: 'Analytics',     sub: 'Progress insights',      path: '/analytics',        color: 'text-mint-400' },
+    { icon: '🏆', label: 'Leaderboard',   sub: 'Check rank',              path: '/leaderboard',      color: 'text-indigo-400' },
   ]
 
   if (loading) return (
-    <div style={{ minHeight: '100vh', background: '#070b14', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 16 }}>
+    <div className="min-h-screen bg-[#070b14] flex flex-col items-center justify-center gap-5">
       <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
-      <div style={{ width: 48, height: 48, border: '3px solid rgba(99,102,241,0.2)', borderTop: '3px solid #6366f1', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
-      <p style={{ color: '#94a3b8', fontFamily: 'sans-serif' }}>Loading...</p>
+      <div className="w-14 h-14 border-4 border-teal-500/20 border-t-teal-400 rounded-full" style={{ animation: 'spin 1s linear infinite' }} />
+      <p className="text-sm font-semibold tracking-widest text-[#94a3b8] animate-pulse">Initializing Student Hub...</p>
     </div>
   )
 
   return (
-    <div style={{ minHeight: '100vh', background: '#070b14', fontFamily: "'DM Sans', sans-serif", overflowX: 'hidden' }}>
+    <div className="min-h-screen bg-[#070b14] text-[#f8fafc] font-sans relative overflow-hidden selection:bg-teal-500/20 selection:text-teal-400">
+      
+      {/* ── Dynamic Keyframes & Custom Styles Injection ───── */}
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap');
-        @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
-        .nav-card:hover { transform:translateY(-6px) !important; box-shadow:0 20px 40px rgba(0,0,0,0.5) !important; }
-        .stat-card:hover { transform:translateY(-3px) !important; }
-        .logout-btn:hover { background:rgba(239,68,68,0.25) !important; }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes pulseGlow { 0%,100% { transform:scale(1); opacity:0.6; } 50% { transform:scale(1.1); opacity:1; } }
+        @keyframes float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-10px); } }
+        
+        .animation-fade-up { animation: fadeUp 0.6s ease both; }
+        .animation-float { animation: float 4s ease-in-out infinite; }
+        .animation-pulse-glow { animation: pulseGlow 8s ease-in-out infinite; }
       `}</style>
 
-      {/* BG blobs */}
-      <div style={{ position:'fixed',top:-300,left:-300,width:700,height:700,background:'radial-gradient(circle,rgba(99,102,241,0.07) 0%,transparent 70%)',borderRadius:'50%',pointerEvents:'none',zIndex:0 }} />
-      <div style={{ position:'fixed',bottom:-200,right:-200,width:500,height:500,background:'radial-gradient(circle,rgba(34,211,238,0.05) 0%,transparent 70%)',borderRadius:'50%',pointerEvents:'none',zIndex:0 }} />
+      {/* ── Ambient High-Energy Background Visuals (Teal Tech) ── */}
+      <div aria-hidden className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+        <div className="absolute -top-[20%] -left-[10%] w-[600px] h-[600px] rounded-full bg-gradient-to-br from-teal-500/10 to-transparent blur-[80px]" />
+        <div className="absolute top-[40%] -right-[15%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-cyan-500/5 to-transparent blur-[70px] animation-pulse-glow" />
+        <div className="absolute bottom-[5%] left-[20%] w-[400px] h-[400px] rounded-full bg-gradient-to-br from-emerald-500/5 to-transparent blur-[60px]" />
+      </div>
 
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 24px', position: 'relative', zIndex: 1 }}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
 
-        {/* NAVBAR */}
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:40, animation:'fadeUp 0.5s ease' }}>
-          <div style={{ display:'flex', alignItems:'center', gap:14 }}>
-            <div style={{ width:46,height:46,background:'linear-gradient(135deg,#6366f1,#22d3ee)',borderRadius:14,display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,boxShadow:'0 0 24px rgba(99,102,241,0.5)' }}>🎓</div>
+        {/* ── TOP ACTION BAR / NAVBAR ─────────────────────── */}
+        <header className="animation-fade-up flex items-center justify-between gap-4 mb-10 pb-5 border-b border-white/[0.04]">
+          <div className="flex items-center gap-4">
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center text-xl shadow-lg shadow-teal-500/20">
+              🎓
+            </div>
             <div>
-              <div style={{ color:'#f1f5f9',fontFamily:'Syne,sans-serif',fontWeight:700,fontSize:18,letterSpacing:'-0.5px' }}>SPMS</div>
-              <div style={{ color:'#475569',fontSize:11,letterSpacing:1,textTransform:'uppercase' }}>Student Portal</div>
+              <div className="text-xl font-extrabold tracking-tight text-white font-display">SPMS</div>
+              <div className="text-[10px] font-extrabold tracking-widest text-teal-400 uppercase">Student Hub</div>
             </div>
           </div>
-          <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-            <div style={{ background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.07)',borderRadius:12,padding:'8px 14px',color:'#64748b',fontSize:12 }}>
-              🕐 {time.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}
+          
+          <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto justify-end">
+            <div className="bg-white/[0.02] border border-white/5 rounded-full px-5 py-2.5 text-xs font-semibold text-[#475569] tracking-wider">
+              🕐 {time.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
             </div>
-            <div style={{ position:'relative' }}>
-              <div style={{ width:40,height:40,background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.07)',borderRadius:12,display:'flex',alignItems:'center',justifyContent:'center',fontSize:16,cursor:'pointer' }}>🔔</div>
-              {stats.notifications>0 && <div style={{ position:'absolute',top:-4,right:-4,background:'#ef4444',color:'white',borderRadius:'50%',width:18,height:18,fontSize:10,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700 }}>{stats.notifications}</div>}
+            
+            <div className="relative">
+              <div className="w-10 h-10 bg-white/[0.02] border border-white/5 rounded-xl flex items-center justify-center text-base cursor-pointer hover:bg-white/[0.06] hover:border-white/10 transition-colors">
+                🔔
+              </div>
+              {stats.notifications > 0 && (
+                <div className="absolute -top-1.5 -right-1.5 bg-teal-500 text-[#070b14] rounded-full w-5 h-5 text-xs font-black flex items-center justify-center animate-bounce">
+                  {stats.notifications}
+                </div>
+              )}
             </div>
-            <button onClick={()=>{logout();navigate('/login');toast.success('Logged out successfully!')}} className="logout-btn" style={{ background:'rgba(239,68,68,0.12)',border:'1px solid rgba(239,68,68,0.25)',color:'#ef4444',borderRadius:12,padding:'8px 18px',cursor:'pointer',fontFamily:'Syne,sans-serif',fontWeight:700,fontSize:13,transition:'all 0.2s' }}>Logout</button>
+            
+            <button 
+              onClick={() => { logout(); navigate('/login'); toast.success('Logged out successfully!') }} 
+              className="px-5 py-2.5 text-xs font-bold text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-xl hover:bg-rose-500/20 hover:border-rose-500/30 transition-all duration-200"
+            >
+              Terminate Session
+            </button>
           </div>
-        </div>
+        </header>
 
-        {/* HERO */}
-        <div style={{ background:'linear-gradient(135deg,rgba(99,102,241,0.13) 0%,rgba(34,211,238,0.06) 100%)',border:'1px solid rgba(99,102,241,0.2)',borderRadius:24,padding:'32px 36px',marginBottom:24,animation:'fadeUp 0.5s ease 0.1s both',position:'relative',overflow:'hidden' }}>
-          <div style={{ position:'absolute',top:-60,right:-60,width:250,height:250,background:'radial-gradient(circle,rgba(99,102,241,0.12) 0%,transparent 70%)',borderRadius:'50%' }} />
-          <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',flexWrap:'wrap',gap:20,position:'relative' }}>
-            <div>
-              <div style={{ color:'#818cf8',fontSize:13,fontWeight:600,marginBottom:8,letterSpacing:2,textTransform:'uppercase' }}>{greeting()} 👋</div>
-              <h1 style={{ fontFamily:'Syne,sans-serif',fontSize:36,fontWeight:700,color:'#f1f5f9',margin:0,letterSpacing:'-1.5px',lineHeight:1 }}>{user?.name}</h1>
-              <div style={{ display:'flex',gap:8,marginTop:12,flexWrap:'wrap' }}>
-                {user?.branch && <span style={{ background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.08)',color:'#94a3b8',padding:'4px 12px',borderRadius:20,fontSize:12 }}>🏫 {user.branch}</span>}
-                {user?.semester && <span style={{ background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.08)',color:'#94a3b8',padding:'4px 12px',borderRadius:20,fontSize:12 }}>📚 Sem {user.semester}</span>}
-                {user?.enrollmentNumber && <span style={{ background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.08)',color:'#94a3b8',padding:'4px 12px',borderRadius:20,fontSize:12 }}>🪪 {user.enrollmentNumber}</span>}
+        {/* ── PROFILE GREETING HUB ───────────────────────── */}
+        <section className="animation-fade-up-1 bg-gradient-to-br from-teal-500/[0.08] to-transparent border border-teal-500/15 rounded-3xl p-8 mb-8 relative overflow-hidden">
+          <div className="absolute -top-32 -right-32 w-72 h-72 bg-teal-500/5 rounded-full blur-3xl pointer-events-none" />
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-6 relative z-10">
+            <div className="text-center sm:text-left">
+              <div className="text-xs font-extrabold text-teal-400 uppercase tracking-widest mb-1.5">{greeting()} 👋</div>
+              <h1 className="text-3xl sm:text-5xl font-black tracking-tighter text-white mb-5">{user?.name}</h1>
+              
+              <div className="flex flex-wrap gap-2.5 justify-center sm:justify-start">
+                {user?.branch && <span className="bg-white/[0.04] border border-white/5 text-[#94a3b8] px-3 py-1 rounded-lg text-xs font-semibold">🏫 Branch: {user.branch}</span>}
+                {user?.semester && <span className="bg-white/[0.04] border border-white/5 text-[#94a3b8] px-3 py-1 rounded-lg text-xs font-semibold">📚 Semester {user.semester}</span>}
+                {user?.enrollmentNumber && <span className="bg-white/[0.04] border border-white/5 text-[#94a3b8] px-3 py-1 rounded-lg text-xs font-semibold">🪪 ID: {user.enrollmentNumber}</span>}
               </div>
             </div>
-            <div style={{ textAlign:'right' }}>
-              <div style={{ color:'#475569',fontSize:12,marginBottom:8 }}>{time.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'})}</div>
-              <div style={{ background:stats.projects>0?'rgba(16,185,129,0.15)':'rgba(245,158,11,0.15)',border:`1px solid ${stats.projects>0?'rgba(16,185,129,0.3)':'rgba(245,158,11,0.3)'}`,color:stats.projects>0?'#10b981':'#f59e0b',padding:'8px 18px',borderRadius:20,fontSize:13,fontWeight:600 }}>
-                {stats.projects>0?'✅ Active Student':'⏳ No Projects Yet'}
-              </div>
+            
+            <div className="text-right w-full sm:w-auto border-t sm:border-t-0 border-white/5 pt-5 sm:pt-0">
+              <div className="text-sm text-[#475569] font-medium mb-2.5 tracking-wide">{time.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
+              <span className={`inline-flex items-center px-4 py-2 rounded-full text-xs font-black ${stats.projects > 0 ? 'bg-teal-500/15 border border-teal-500/20 text-teal-400' : 'bg-amber-500/15 border border-amber-500/20 text-amber-400'}`}>
+                {stats.projects > 0 ? '● Active Student Portal' : '○ Pending Pipeline'}
+              </span>
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* STATS */}
-        <div style={{ display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:14,marginBottom:24,animation:'fadeUp 0.5s ease 0.2s both' }}>
+        {/* ── CORE STATISTICS TRACKER ─────────────────────── */}
+        <section className="animation-fade-up-2 grid grid-cols-2 md:grid-cols-4 gap-5 mb-8">
           {[
-            { label:'Projects',    value:stats.projects,             icon:'📁', color:'#6366f1', bg:'rgba(99,102,241,0.1)',  border:'rgba(99,102,241,0.2)' },
-            { label:'Team',        value:stats.team?'Joined':'None', icon:'👥', color:'#22d3ee', bg:'rgba(34,211,238,0.1)',  border:'rgba(34,211,238,0.2)' },
-            { label:'Submissions', value:stats.submissions,          icon:'📤', color:'#10b981', bg:'rgba(16,185,129,0.1)', border:'rgba(16,185,129,0.2)' },
-            { label:'Unread',      value:stats.notifications,        icon:'🔔', color:'#f59e0b', bg:'rgba(245,158,11,0.1)', border:'rgba(245,158,11,0.2)' },
-          ].map(s=>(
-            <div key={s.label} className="stat-card" style={{ background:s.bg,border:`1px solid ${s.border}`,borderRadius:18,padding:'22px 18px',transition:'transform 0.2s',cursor:'default' }}>
-              <div style={{ fontSize:24,marginBottom:10 }}>{s.icon}</div>
-              <div style={{ fontSize:28,fontWeight:700,color:s.color,fontFamily:'Syne,sans-serif',lineHeight:1 }}>{s.value}</div>
-              <div style={{ color:'#475569',fontSize:12,marginTop:6 }}>{s.label}</div>
+            { label: 'Active Projects', value: stats.projects, icon: '📁', bg: 'bg-teal-500/10 border-teal-500/20', hover: 'hover:border-teal-400 group', color: 'text-teal-400' },
+            { label: 'Workspace Team', value: stats.team ? 'Joined' : 'No Team', icon: '👥', bg: 'bg-emerald-500/10 border-emerald-500/20', hover: 'hover:border-emerald-400 group', color: 'text-emerald-400' },
+            { label: 'Artifact Submissions', value: stats.submissions, icon: '📤', bg: 'bg-cyan-500/10 border-cyan-500/20', hover: 'hover:border-cyan-400 group', color: 'text-cyan-400' },
+            { label: 'Unread Alerts', value: stats.notifications, icon: '🔔', bg: 'bg-amber-500/10 border-amber-500/20', hover: 'hover:border-amber-400 group', color: 'text-amber-400' },
+          ].map((s) => (
+            <div key={s.label} className={`${s.bg} border rounded-2xl p-6 transition-all duration-200 ${s.hover}`}>
+              <div className={`text-2xl mb-4 opacity-90 group-hover:scale-105 transition-transform`}>{s.icon}</div>
+              <div className={`text-3xl font-black text-white tracking-tighter transition-colors ${s.color}`}>{s.value}</div>
+              <div className="text-[11px] text-[#475569] font-bold mt-1.5 tracking-wide uppercase">{s.label}</div>
             </div>
           ))}
-        </div>
+        </section>
 
-        {/* MAIN GRID */}
-        <div style={{ display:'grid',gridTemplateColumns:'1.4fr 1fr',gap:20,animation:'fadeUp 0.5s ease 0.3s both' }}>
-          <div>
-            <div style={{ color:'#334155',fontSize:11,fontWeight:600,letterSpacing:2,textTransform:'uppercase',marginBottom:14 }}>Quick Actions</div>
-            <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:12 }}>
-              {navItems.map(item=>(
-                <div key={item.label} className="nav-card" onClick={()=>navigate(item.path)} style={{ background:'rgba(15,23,42,0.9)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:20,padding:'22px 18px',cursor:'pointer',transition:'all 0.25s',position:'relative',overflow:'hidden' }}>
-                  <div style={{ position:'absolute',top:-30,right:-30,width:100,height:100,background:`radial-gradient(circle,${item.glow} 0%,transparent 70%)`,borderRadius:'50%' }} />
-                  <div style={{ fontSize:28,marginBottom:14 }}>{item.icon}</div>
-                  <div style={{ color:'#f1f5f9',fontFamily:'Syne,sans-serif',fontWeight:700,fontSize:15,marginBottom:4 }}>{item.label}</div>
-                  <div style={{ color:'#475569',fontSize:12 }}>{item.sub}</div>
-                  <div style={{ marginTop:16,color:item.color,fontSize:12,fontWeight:700,display:'flex',alignItems:'center',gap:4 }}>Go <span>→</span></div>
+        {/* ── DASHBOARD ACTIONS & WORKSPACE ACTIVITIES ────── */}
+        <div className="animation-fade-up-3 grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          {/* Action Grid Panel */}
+          <div className="lg:col-span-2">
+            <h2 className="text-xs font-extrabold tracking-widest text-[#475569] uppercase mb-4">Launchpad</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+              {navItems.map((item) => (
+                <div 
+                  key={item.label} 
+                  onClick={() => navigate(item.path)} 
+                  className="bg-white/[0.03] border border-white/5 hover:border-teal-500/30 rounded-2xl p-6 cursor-pointer transition-all duration-300 group relative overflow-hidden hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/30"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="text-3xl">{item.icon}</div>
+                    <div className="text-[11px] text-teal-400 font-extrabold opacity-0 group-hover:opacity-100 transition-opacity">Access ↗</div>
+                  </div>
+                  <h3 className={`text-base font-bold text-[#f1f5f9] mt-5 mb-0.5 tracking-tight group-hover:${item.color} transition-colors`}>{item.label}</h3>
+                  <p className="text-[11px] text-[#475569] font-semibold">{item.sub}</p>
                 </div>
               ))}
             </div>
           </div>
 
+          {/* Activities Panel */}
           <div>
-            <div style={{ color:'#334155',fontSize:11,fontWeight:600,letterSpacing:2,textTransform:'uppercase',marginBottom:14 }}>Recent Activity</div>
-            <div style={{ background:'rgba(15,23,42,0.9)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:20,padding:20,minHeight:280 }}>
-              {notifications.length===0?(
-                <div style={{ display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',height:240,gap:12 }}>
-                  <div style={{ fontSize:40,opacity:0.2,animation:'float 3s ease infinite' }}>🔔</div>
-                  <p style={{ color:'#334155',fontSize:13,textAlign:'center',lineHeight:1.6 }}>No activity yet.<br/>Submit a project!</p>
-                  <button onClick={()=>navigate('/student/projects')} style={{ background:'rgba(99,102,241,0.15)',border:'1px solid rgba(99,102,241,0.3)',color:'#818cf8',borderRadius:10,padding:'8px 18px',cursor:'pointer',fontFamily:'Syne,sans-serif',fontWeight:600,fontSize:12 }}>Create Project →</button>
+            <h2 className="text-xs font-extrabold tracking-widest text-[#475569] uppercase mb-4">Workspace Activity</h2>
+            <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-6 min-h-[350px]">
+              {notifications.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <div className="text-4xl opacity-30 animation-float mb-4">📭</div>
+                  <p className="text-xs text-[#475569] font-bold leading-relaxed max-w-sm">
+                    No active notifications found.<br />Your pipeline is clear for progress.
+                  </p>
+                  <button 
+                    onClick={() => navigate('/student/projects')} 
+                    className="mt-5 px-5 py-2.5 text-xs font-bold text-teal-400 bg-teal-500/10 border border-teal-500/20 rounded-xl hover:bg-teal-500/20 transition-colors"
+                  >
+                    Build First Project
+                  </button>
                 </div>
-              ):(
-                <div style={{ display:'flex',flexDirection:'column',gap:10 }}>
-                  {notifications.map((n,i)=>(
-                    <div key={n._id} style={{ background:n.isRead?'rgba(255,255,255,0.02)':'rgba(99,102,241,0.07)',border:`1px solid ${n.isRead?'rgba(255,255,255,0.04)':'rgba(99,102,241,0.15)'}`,borderRadius:12,padding:'12px 14px',animation:`fadeUp 0.4s ease ${i*0.08}s both` }}>
-                      {!n.isRead&&<div style={{ width:6,height:6,background:'#6366f1',borderRadius:'50%',marginBottom:6,animation:'pulse 2s infinite' }} />}
-                      <div style={{ color:'#e2e8f0',fontSize:13,fontWeight:600 }}>{n.title}</div>
-                      <div style={{ color:'#475569',fontSize:12,marginTop:4,lineHeight:1.4 }}>{n.message?.slice(0,65)}{n.message?.length>65?'...':''}</div>
+              ) : (
+                <div className="flex flex-col gap-3.5">
+                  {notifications.map((n, i) => (
+                    <div 
+                      key={n._id || i} 
+                      className={`rounded-xl p-4 border transition-all ${
+                        n.isRead 
+                          ? 'bg-white/[0.01] border-white/5 opacity-70' 
+                          : 'bg-teal-500/[0.04] border-teal-500/10'
+                      }`}
+                    >
+                      {!n.isRead && (
+                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-teal-400 mb-1.5 animate-pulse" />
+                      )}
+                      <h4 className="text-xs font-bold text-[#f1f5f9] tracking-tight">{n.title}</h4>
+                      <p className="text-[10px] text-[#475569] font-semibold mt-1 leading-relaxed">
+                        {n.message?.slice(0, 80)}{n.message?.length > 80 ? '...' : ''}
+                      </p>
                     </div>
                   ))}
                 </div>
               )}
             </div>
           </div>
+
         </div>
 
-        <div style={{ marginTop:32,textAlign:'center',color:'#1e293b',fontSize:11,letterSpacing:1,animation:'fadeUp 0.5s ease 0.4s both' }}>SPMS v1.0 — Student Project Management System</div>
+        {/* ── FOOTER SYSTEM MARKER ───────────────────────── */}
+        <footer className="mt-14 pt-6 border-t border-white/[0.03] text-center text-[10px] font-black font-mono tracking-widest text-[#1c253b] uppercase">
+          System Secure // Core Secured Hub v1.0
+        </footer>
       </div>
     </div>
   )

@@ -1,28 +1,75 @@
-// frontend/src/pages/student/MyTeam.jsx
+// frontend/src/pages/student/TeamChat.jsx
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
+import { useSocket } from '../../context/SocketContext'
 import API from '../../api/axios'
-import toast from 'react-hot-toast'
+import { messageService } from '../../services/messageService'
 
-export default function MyTeam() {
+export default function TeamChat() {
+  const { user } = useAuth()
+  const { socket } = useSocket()
   const navigate = useNavigate()
-  const [team, setTeam]           = useState(null)
-  const [loading, setLoading]     = useState(true)
-  const [showCreate, setShowCreate] = useState(false)
-  const [showAdd, setShowAdd]     = useState(false)
-  const [teamName, setTeamName]   = useState('')
-  const [teamDesc, setTeamDesc]   = useState('')
-  const [memberEmail, setMemberEmail] = useState('')
-  const [memberRole, setMemberRole]   = useState('developer')
-  const [submitting, setSubmitting]   = useState(false)
 
-  useEffect(() => { fetchTeam() }, [])
+  const [team, setTeam]         = useState(null)
+  const [messages, setMessages] = useState([])
+  const [input, setInput]       = useState('')
+  const [loading, setLoading]   = useState(true)
+  const [typing, setTyping]     = useState(null)
+  const bottomRef = useRef()
+  const typingTimer = useRef()
+
+  useEffect(() => {
+    fetchTeam()
+  }, [])
+
+  useEffect(() => {
+    if (!socket || !team) return
+
+    socket.emit('join-room', team._id)
+
+    socket.on('receive-message', (msg) => {
+      setMessages(prev => [...prev, msg])
+    })
+
+    socket.on('user-typing', ({ name, userId }) => {
+      if (userId !== user._id) {
+        setTyping(name)
+        if (typingTimer.current) clearTimeout(typingTimer.current)
+        typingTimer.current = setTimeout(() => setTyping(null), 2000)
+      }
+    })
+
+    return () => {
+      socket.off('receive-message')
+      socket.off('user-typing')
+      if (typingTimer.current) clearTimeout(typingTimer.current)
+    }
+  }, [socket, team])
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages, typing])
 
   const fetchTeam = async () => {
     try {
       const res = await API.get('/teams/my')
-      setTeam(res.data.team)
+      const t = res.data.team
+      setTeam(t)
+      if (t?._id) {
+        const msgRes = await messageService.getTeamMessages(t._id)
+        setMessages(
+          (msgRes.data.messages || []).map((m) => ({
+            id: m._id,
+            text: m.text,
+            senderId: m.sender?._id || m.sender,
+            senderName: m.senderName || m.sender?.name,
+            time: m.createdAt,
+            roomId: t._id,
+          }))
+        )
+      }
     } catch {
       setTeam(null)
     } finally {
@@ -30,190 +77,218 @@ export default function MyTeam() {
     }
   }
 
-  const createTeam = async (e) => {
+  const sendMessage = (e) => {
     e.preventDefault()
-    if (!teamName) return toast.error('Team name zaroori hai!')
-    setSubmitting(true)
-    try {
-      await API.post('/teams', { name: teamName, description: teamDesc })
-      toast.success('Team ban gayi! 🎉')
-      setShowCreate(false)
-      setTeamName('')
-      setTeamDesc('')
-      fetchTeam()
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Error aaya!')
-    } finally {
-      setSubmitting(false)
+    if (!input.trim() || !socket || !team) return
+
+    const msg = {
+      id:      Date.now(),
+      text:      input.trim(),
+      senderId:  user._id,
+      senderName: user.name,
+      time:      new Date().toISOString(),
+      roomId:    team._id,
     }
+
+    socket.emit('send-message', msg)
+    setMessages((prev) => [...prev, msg])
+    setInput('')
   }
 
-  const addMember = async (e) => {
-    e.preventDefault()
-    if (!memberEmail) return toast.error('Email daalo!')
-    setSubmitting(true)
-    try {
-      await API.post(`/teams/${team._id}/add-member`, { email: memberEmail, role: memberRole })
-      toast.success('Member add ho gaya! 🎉')
-      setShowAdd(false)
-      setMemberEmail('')
-      fetchTeam()
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Error aaya!')
-    } finally {
-      setSubmitting(false)
-    }
+  const handleTyping = () => {
+    if (!socket || !team) return
+    socket.emit('typing', { roomId: team._id, name: user.name, userId: user._id })
   }
 
-  const removeMember = async (userId, name) => {
-    if (!confirm(`${name} ko remove karna chahte ho?`)) return
-    try {
-      await API.delete(`/teams/${team._id}/remove-member/${userId}`)
-      toast.success('Member remove ho gaya.')
-      fetchTeam()
-    } catch {
-      toast.error('Remove nahi hua!')
-    }
+  const formatTime = (iso) => {
+    return new Date(iso).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
   }
 
-  const ROLE_COLORS = {
-    leader:    { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)' },
-    developer: { color: '#6366f1', bg: 'rgba(99,102,241,0.12)' },
-    designer:  { color: '#ec4899', bg: 'rgba(236,72,153,0.12)' },
-    tester:    { color: '#10b981', bg: 'rgba(16,185,129,0.12)' },
-    member:    { color: '#94a3b8', bg: 'rgba(148,163,184,0.12)' },
+  const MEMBER_COLORS = ['text-cyan-400', 'text-emerald-400', 'text-blue-400', 'text-purple-400', 'text-rose-400']
+  const MEMBER_BGS = ['from-cyan-500', 'from-emerald-500', 'from-blue-500', 'from-purple-500', 'from-rose-500']
+  
+  const getMemberIndex = (name) => {
+    return (name?.charCodeAt(0) || 0) % MEMBER_COLORS.length
   }
 
   if (loading) return (
-    <div style={{ minHeight:'100vh',background:'#070b14',display:'flex',alignItems:'center',justifyContent:'center' }}>
-      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-      <div style={{ width:40,height:40,border:'3px solid rgba(34,211,238,0.2)',borderTop:'3px solid #22d3ee',borderRadius:'50%',animation:'spin 1s linear infinite' }} />
+    <div className="min-h-screen bg-[#070b14] flex flex-col items-center justify-center gap-5 font-sans">
+      <div className="w-14 h-14 border-4 border-cyan-500/20 border-t-cyan-400 rounded-full animate-spin" />
+      <p className="text-sm font-semibold tracking-widest text-slate-400 animate-pulse">Establishing Workspace Streams...</p>
+    </div>
+  )
+
+  if (!team) return (
+    <div className="min-h-screen bg-[#070b14] flex flex-col items-center justify-center gap-6 text-center px-4 font-sans">
+      <div className="text-6xl opacity-25 animate-bounce">💬</div>
+      <div>
+        <h2 className="text-xl font-black text-white tracking-tight">No Active Workspace Found</h2>
+        <p className="text-xs text-slate-500 font-bold mt-1.5 max-w-xs leading-relaxed">
+          Please initialize or join a team squad inside your launchpad before accessing the group server module.
+        </p>
+      </div>
+      <button 
+        onClick={() => navigate('/student/team')} 
+        className="px-6 py-3 text-xs font-black tracking-widest uppercase text-[#070b14] bg-gradient-to-r from-cyan-400 to-blue-500 rounded-xl hover:opacity-90 shadow-lg shadow-cyan-500/20 transition-all active:scale-95"
+      >
+        Access My Team Roster
+      </button>
     </div>
   )
 
   return (
-    <div style={{ minHeight:'100vh',background:'#070b14',fontFamily:"'DM Sans',sans-serif" }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap');
-        @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-        .member-row:hover{background:rgba(255,255,255,0.04) !important;}
-      `}</style>
+    <div className="h-screen bg-[#070b14] text-slate-100 font-sans flex flex-col relative overflow-hidden">
+      
+      {/* Background Neon Blurred Blobs */}
+      <div aria-hidden className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-gradient-to-br from-cyan-500/5 to-transparent blur-[80px]" />
+        <div className="absolute bottom-0 left-0 w-[450px] h-[450px] rounded-full bg-gradient-to-tr from-blue-500/5 to-transparent blur-[90px]" />
+      </div>
 
-      <div style={{ maxWidth:800,margin:'0 auto',padding:'32px 24px' }}>
-
-        {/* Header */}
-        <div style={{ marginBottom:32,animation:'fadeUp 0.4s ease' }}>
-          <button onClick={()=>navigate('/student/dashboard')} style={{ background:'none',border:'none',color:'#475569',cursor:'pointer',fontSize:13,marginBottom:8,display:'block',padding:0 }}>← Back to Dashboard</button>
-          <h1 style={{ fontFamily:'Syne,sans-serif',fontSize:28,fontWeight:800,color:'#f1f5f9',margin:0,letterSpacing:'-1px' }}>👥 My Team</h1>
+      {/* HEADER PANEL */}
+      <header className="bg-[#0b1324]/80 backdrop-blur-xl border-b border-white/[0.04] px-5 py-4 flex items-center justify-between flex-shrink-0 relative z-10">
+        <div className="flex items-center gap-4 min-w-0">
+          <button 
+            onClick={() => navigate('/student/dashboard')} 
+            className="w-9 h-9 bg-white/[0.02] border border-white/5 hover:border-white/10 text-slate-400 hover:text-white rounded-xl flex items-center justify-center text-sm transition-all active:scale-95"
+          >
+            ←
+          </button>
+          
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 via-blue-500 to-indigo-500 flex items-center justify-center text-lg shadow-md shadow-cyan-500/10">
+            💬
+          </div>
+          
+          <div className="overflow-hidden">
+            <h1 className="font-extrabold text-sm sm:text-base text-white tracking-tight truncate">{team.name}</h1>
+            <p className="text-[10px] font-bold text-cyan-400 tracking-wider uppercase mt-0.5">{team.members?.length || 0} Synced Nodes</p>
+          </div>
         </div>
 
-        {/* No Team State */}
-        {!team && !showCreate && (
-          <div style={{ textAlign:'center',padding:'80px 0',background:'rgba(15,23,42,0.9)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:24,animation:'fadeUp 0.4s ease' }}>
-            <div style={{ fontSize:56,marginBottom:16,opacity:0.3 }}>👥</div>
-            <h2 style={{ fontFamily:'Syne,sans-serif',color:'#f1f5f9',fontSize:20,marginBottom:8 }}>Koi Team Nahi</h2>
-            <p style={{ color:'#475569',fontSize:14,marginBottom:28 }}>Apni team banao ya kisi team mein join karo</p>
-            <button onClick={()=>setShowCreate(true)} style={{ background:'linear-gradient(135deg,#22d3ee,#6366f1)',border:'none',borderRadius:12,padding:'12px 28px',color:'white',cursor:'pointer',fontFamily:'Syne,sans-serif',fontWeight:700,fontSize:15,boxShadow:'0 0 20px rgba(34,211,238,0.3)' }}>
-              + Team Banao
-            </button>
-          </div>
-        )}
-
-        {/* Create Team Form */}
-        {showCreate && (
-          <div style={{ background:'rgba(15,23,42,0.95)',border:'1px solid rgba(34,211,238,0.3)',borderRadius:20,padding:28,marginBottom:20,animation:'fadeUp 0.3s ease' }}>
-            <h2 style={{ fontFamily:'Syne,sans-serif',color:'#f1f5f9',fontSize:18,margin:'0 0 20px' }}>✨ New Team</h2>
-            <form onSubmit={createTeam} style={{ display:'flex',flexDirection:'column',gap:14 }}>
-              <div>
-                <label style={{ fontSize:12,color:'#475569',marginBottom:6,display:'block',textTransform:'uppercase',letterSpacing:1 }}>Team Name *</label>
-                <input value={teamName} onChange={e=>setTeamName(e.target.value)} placeholder="e.g. Team Alpha" className="custom-input" />
-              </div>
-              <div>
-                <label style={{ fontSize:12,color:'#475569',marginBottom:6,display:'block',textTransform:'uppercase',letterSpacing:1 }}>Description</label>
-                <input value={teamDesc} onChange={e=>setTeamDesc(e.target.value)} placeholder="Team ke baare mein..." className="custom-input" />
-              </div>
-              <div style={{ display:'flex',gap:10 }}>
-                <button type="submit" disabled={submitting} style={{ flex:1,background:'linear-gradient(135deg,#22d3ee,#6366f1)',border:'none',borderRadius:10,padding:'12px',color:'white',cursor:'pointer',fontFamily:'Syne,sans-serif',fontWeight:700,fontSize:14 }}>
-                  {submitting?'Creating...':'Create Team →'}
-                </button>
-                <button type="button" onClick={()=>setShowCreate(false)} style={{ flex:1,background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:10,color:'#94a3b8',cursor:'pointer',fontFamily:'Syne,sans-serif',fontWeight:600 }}>Cancel</button>
-              </div>
-            </form>
-          </div>
-        )}
-
-        {/* Team Details */}
-        {team && (
-          <div style={{ animation:'fadeUp 0.4s ease' }}>
-
-            {/* Team Header Card */}
-            <div style={{ background:'linear-gradient(135deg,rgba(34,211,238,0.1) 0%,rgba(99,102,241,0.07) 100%)',border:'1px solid rgba(34,211,238,0.2)',borderRadius:20,padding:'24px 28px',marginBottom:20 }}>
-              <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',flexWrap:'wrap',gap:12 }}>
-                <div>
-                  <h2 style={{ fontFamily:'Syne,sans-serif',color:'#f1f5f9',fontSize:24,fontWeight:800,margin:'0 0 6px',letterSpacing:'-0.5px' }}>{team.name}</h2>
-                  {team.description && <p style={{ color:'#64748b',fontSize:13,margin:0 }}>{team.description}</p>}
+        {/* Online Sync Roster */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="items-center -space-x-2.5 hidden sm:flex">
+            {team.members?.slice(0, 4).map((m, i) => {
+              const name = m.user?.name || 'User'
+              const idx = getMemberIndex(name)
+              return (
+                <div 
+                  key={i} 
+                  title={name} 
+                  className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-black border-2 border-[#070b14] shadow-md bg-gradient-to-br ${MEMBER_BGS[idx]} to-slate-800`}
+                >
+                  {name.charAt(0).toUpperCase()}
                 </div>
-                <div style={{ display:'flex',gap:10,alignItems:'center' }}>
-                  <div style={{ background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:12,padding:'6px 14px',color:'#94a3b8',fontSize:13 }}>
-                    👥 {team.members?.length}/{team.maxMembers} members
-                  </div>
-                  <button onClick={()=>setShowAdd(!showAdd)} style={{ background:'rgba(34,211,238,0.12)',border:'1px solid rgba(34,211,238,0.25)',borderRadius:12,padding:'8px 16px',color:'#22d3ee',cursor:'pointer',fontFamily:'Syne,sans-serif',fontWeight:700,fontSize:13 }}>
-                    + Add Member
-                  </button>
-                </div>
-              </div>
+              )
+            })}
+          </div>
+          {team.members?.length > 4 && (
+            <span className="text-[10px] font-extrabold bg-white/[0.03] border border-white/5 px-2 py-1 rounded-md text-slate-500">
+              +{team.members.length - 4}
+            </span>
+          )}
+        </div>
+      </header>
+
+      {/* MAIN STREAM SPACE */}
+      <main className="flex-1 overflow-y-auto px-5 py-6 flex flex-col gap-5 relative z-10 scrollbar-thin">
+        {messages.length === 0 && (
+          <div className="text-center my-auto flex flex-col items-center justify-center gap-3">
+            <div className="text-5xl opacity-20 animate-pulse">📡</div>
+            <div className="max-w-xs">
+              <h3 className="text-xs font-extrabold text-slate-400 uppercase tracking-widest">Secure Broadcast Channel</h3>
+              <p className="text-[11px] text-slate-500 font-semibold leading-relaxed mt-1">
+                Zero log artifacts streaming in terminal. Enter a transmission query below to message teammates.
+              </p>
             </div>
+          </div>
+        )}
 
-            {/* Add Member Form */}
-            {showAdd && (
-              <div style={{ background:'rgba(15,23,42,0.95)',border:'1px solid rgba(99,102,241,0.3)',borderRadius:16,padding:20,marginBottom:16,animation:'fadeUp 0.3s ease' }}>
-                <h3 style={{ fontFamily:'Syne,sans-serif',color:'#f1f5f9',fontSize:15,margin:'0 0 14px' }}>➕ Add New Member</h3>
-                <form onSubmit={addMember} style={{ display:'flex',gap:10,flexWrap:'wrap' }}>
-                  <input value={memberEmail} onChange={e=>setMemberEmail(e.target.value)} placeholder="Member ka email" className="custom-input" style={{ flex:2,minWidth:200 }} />
-                  <select value={memberRole} onChange={e=>setMemberRole(e.target.value)} className="custom-input" style={{ flex:1,minWidth:130 }}>
-                    <option value="developer">👨‍💻 Developer</option>
-                    <option value="designer">🎨 Designer</option>
-                    <option value="tester">🧪 Tester</option>
-                    <option value="member">👤 Member</option>
-                  </select>
-                  <button type="submit" disabled={submitting} style={{ background:'linear-gradient(135deg,#6366f1,#818cf8)',border:'none',borderRadius:10,padding:'12px 20px',color:'white',cursor:'pointer',fontFamily:'Syne,sans-serif',fontWeight:700,whiteSpace:'nowrap' }}>
-                    {submitting?'Adding...':'Add →'}
-                  </button>
-                </form>
-              </div>
-            )}
+        {/* Message Compilations */}
+        {messages.map((msg, i) => {
+          const isMe = msg.senderId === user._id
+          const idx = getMemberIndex(msg.senderName)
+          const showAvatar = i === 0 || messages[i - 1]?.senderId !== msg.senderId
 
-            {/* Members List */}
-            <div style={{ background:'rgba(15,23,42,0.9)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:20,overflow:'hidden' }}>
-              <div style={{ padding:'16px 24px',borderBottom:'1px solid rgba(255,255,255,0.05)' }}>
-                <span style={{ color:'#334155',fontSize:11,fontWeight:600,letterSpacing:2,textTransform:'uppercase' }}>Team Members</span>
-              </div>
-              {team.members?.map((m,i)=>{
-                const rc = ROLE_COLORS[m.role]||ROLE_COLORS.member
-                return (
-                  <div key={m.user?._id||i} className="member-row" style={{ display:'flex',justifyContent:'space-between',alignItems:'center',padding:'16px 24px',borderBottom:'1px solid rgba(255,255,255,0.04)',transition:'background 0.2s' }}>
-                    <div style={{ display:'flex',alignItems:'center',gap:14 }}>
-                      <div style={{ width:42,height:42,background:'linear-gradient(135deg,#6366f1,#22d3ee)',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontWeight:800,fontSize:16,flexShrink:0 }}>
-                        {m.user?.name?.charAt(0).toUpperCase()||'?'}
-                      </div>
-                      <div>
-                        <div style={{ color:'#f1f5f9',fontSize:15,fontWeight:600 }}>{m.user?.name||'Unknown'}</div>
-                        <div style={{ color:'#475569',fontSize:12,marginTop:2 }}>{m.user?.email}</div>
-                      </div>
-                    </div>
-                    <div style={{ display:'flex',alignItems:'center',gap:10 }}>
-                      <span style={{ background:rc.bg,color:rc.color,padding:'4px 12px',borderRadius:20,fontSize:12,fontWeight:600 }}>{m.role}</span>
-                      {m.role!=='leader' && (
-                        <button onClick={()=>removeMember(m.user?._id,m.user?.name)} style={{ background:'rgba(239,68,68,0.1)',border:'1px solid rgba(239,68,68,0.2)',borderRadius:8,padding:'5px 12px',color:'#ef4444',cursor:'pointer',fontSize:12,fontWeight:600,transition:'all 0.2s' }}>Remove</button>
-                      )}
-                    </div>
+          return (
+            <div 
+              key={msg.id || i} 
+              className={`flex items-end gap-3 max-w-full sm:max-w-3xl animate-fadeUp ${isMe ? 'self-end flex-row-reverse' : 'self-start'}`}
+            >
+              {!isMe ? (
+                showAvatar ? (
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-black flex-shrink-0 shadow-md border border-white/5 bg-gradient-to-br ${MEMBER_BGS[idx]} to-slate-900`}>
+                    {msg.senderName?.charAt(0).toUpperCase()}
                   </div>
+                ) : (
+                  <div className="w-8 flex-shrink-0" />
                 )
-              })}
+              ) : null}
+
+              <div className="flex flex-col max-w-[82%] sm:max-w-md">
+                {showAvatar && !isMe && (
+                  <span className={`text-[11px] font-bold tracking-tight mb-1 ml-1 ${MEMBER_COLORS[idx]}`}>
+                    {msg.senderName}
+                  </span>
+                )}
+                
+                <div 
+                  className={`px-4 py-3 text-sm font-medium tracking-normal leading-relaxed break-words border ${
+                    isMe 
+                      ? 'bg-gradient-to-br from-cyan-400 to-blue-500 text-[#070b14] border-cyan-400/20 rounded-[18px] rounded-br-[4px] font-semibold shadow-lg shadow-cyan-500/5' 
+                      : 'bg-[#0f172a]/90 text-slate-200 border-white/[0.04] rounded-[18px] rounded-bl-[4px]'
+                  }`}
+                >
+                  {msg.text}
+                </div>
+                
+                <span className={`text-[9px] font-bold text-slate-500 mt-1 tracking-wider px-1 ${isMe ? 'text-right' : 'text-left'}`}>
+                  {formatTime(msg.time)}
+                </span>
+              </div>
+            </div>
+          )
+        })}
+
+        {/* Typing Indicators */}
+        {typing && (
+          <div className="flex items-center gap-3 self-start pl-11 animate-pulse">
+            <span className="text-[11px] font-bold tracking-wide text-cyan-400/80 uppercase">{typing} logging input</span>
+            <div className="flex items-center gap-1 h-3">
+              <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-bounce [animation-delay:-0.3s]" />
+              <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-bounce [animation-delay:-0.15s]" />
+              <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-bounce" />
             </div>
           </div>
         )}
-      </div>
+
+        <div ref={bottomRef} />
+      </main>
+
+      {/* FOOTER CONTROLS */}
+      <footer className="bg-[#0b1324]/90 backdrop-blur-xl border-t border-white/[0.04] p-4 sm:p-5 flex-shrink-0 relative z-10">
+        <form onSubmit={sendMessage} className="flex items-center gap-3 max-w-7xl mx-auto">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleTyping}
+            placeholder="Type your secure terminal transmission message..."
+            className="flex-1 bg-white/[0.03] border border-white/5 focus:border-cyan-500/30 rounded-xl px-4 py-3.5 text-sm text-slate-200 placeholder-slate-600 font-medium outline-none transition-all focus:shadow-xl focus:shadow-black/20"
+          />
+          <button 
+            type="submit" 
+            disabled={!input.trim()} 
+            className={`w-12 h-12 rounded-xl text-lg font-black flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
+              input.trim() 
+                ? 'bg-gradient-to-br from-cyan-400 to-blue-500 text-[#070b14] cursor-pointer shadow-lg shadow-cyan-400/10 active:scale-95' 
+                : 'bg-white/[0.02] border border-white/5 text-slate-600 cursor-not-allowed'
+            }`}
+          >
+            ↑
+          </button>
+        </form>
+      </footer>
     </div>
   )
 }

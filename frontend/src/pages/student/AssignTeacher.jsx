@@ -38,7 +38,7 @@ export default function AssignTeacher() {
       setMentors(mentorRes.data.mentors || [])
       setMyRequests(reqRes.data.requests || [])
     } catch {
-      toast.error('Data load nahi hua!')
+      toast.error('Data pipeline synchronization failed!')
     } finally {
       setLoading(false)
     }
@@ -57,16 +57,16 @@ export default function AssignTeacher() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!form.projectId || !form.subjectId)
-      return toast.error('Project aur Subject select karo!')
+      return toast.error('Project parameter token missing!')
     setSubmitting(true)
     try {
       await API.post('/subjects/request', form)
-      toast.success('Request bhej di! Teacher approve karenge. 🎉')
-      setForm({ projectId:'', subjectId:'', mentorId:'', message:'' })
+      toast.success('Routing vector request emitted successfully! 🎉')
+      setForm({ projectId: '', subjectId: '', mentorId: '', message: '' })
       fetchData()
       setActiveTab('requests')
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Error aaya!')
+      toast.error(err.response?.data?.message || 'Transaction error on network node')
     } finally {
       setSubmitting(false)
     }
@@ -75,113 +75,160 @@ export default function AssignTeacher() {
   const selectedSubject = subjects.find(s => s._id === form.subjectId)
 
   const STATUS_MAP = {
-    pending:  { color:'#f59e0b', bg:'rgba(245,158,11,0.12)', label:'⏳ Pending',  icon:'⏳' },
-    approved: { color:'#10b981', bg:'rgba(16,185,129,0.12)', label:'✅ Approved', icon:'✅' },
-    rejected: { color:'#ef4444', bg:'rgba(239,68,68,0.12)',  label:'❌ Rejected', icon:'❌' },
+    pending:  { color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20', label: '⏳ Pending' },
+    approved: { color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20', label: '✅ Approved' },
+    rejected: { color: 'text-red-400', bg: 'bg-red-500/10 border-red-500/20', label: '❌ Rejected' },
   }
 
   if (loading) return (
-    <div style={{ minHeight:'100vh',background:'#070b14',display:'flex',alignItems:'center',justifyContent:'center' }}>
-      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-      <div style={{ width:40,height:40,border:'3px solid rgba(99,102,241,0.2)',borderTop:'3px solid #6366f1',borderRadius:'50%',animation:'spin 1s linear infinite' }} />
+    <div className="min-h-screen bg-[#070b14] flex items-center justify-center">
+      <div className="w-10 h-10 border-3 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin" />
     </div>
   )
 
   return (
-    <div style={{ minHeight:'100vh',background:'#070b14',fontFamily:"'DM Sans',sans-serif" }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap');
-        @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-        .sub-item:hover{border-color:rgba(99,102,241,0.4) !important;background:rgba(99,102,241,0.08) !important;}
-        .sub-item.selected{border-color:#6366f1 !important;background:rgba(99,102,241,0.12) !important;}
-      `}</style>
+    <div className="min-h-screen bg-[#070b14] text-slate-300 font-sans selection:bg-indigo-500/30">
+      <div className="max-w-[900px] mx-auto px-6 py-8">
 
-      <div style={{ maxWidth:900,margin:'0 auto',padding:'32px 24px' }}>
-
-        {/* Header */}
-        <div style={{ marginBottom:28,animation:'fadeUp 0.4s ease' }}>
-          <button onClick={()=>navigate('/student/dashboard')} style={{ background:'none',border:'none',color:'#475569',cursor:'pointer',fontSize:13,marginBottom:8,display:'block',padding:0 }}>← Dashboard</button>
-          <h1 style={{ fontFamily:'Syne,sans-serif',fontSize:28,fontWeight:800,color:'#f1f5f9',margin:0 }}>🎓 Assign Teacher</h1>
-          <p style={{ color:'#475569',fontSize:13,marginTop:4 }}>Project ke liye teacher aur subject select karo</p>
+        {/* Dynamic Nav Header Block */}
+        <div className="mb-8 animate-fadeUp">
+          <button 
+            onClick={() => navigate('/student/dashboard')} 
+            className="bg-transparent border-none text-slate-500 hover:text-slate-400 cursor-pointer text-xs font-bold uppercase tracking-wider mb-2 block p-0 transition-colors"
+          >
+            ← System Gateway
+          </button>
+          <h1 className="font-syne text-3xl font-extrabold text-white tracking-tight">🎓 Teacher Authorization Matrix</h1>
+          <p className="text-slate-500 text-xs font-medium mt-1">Bind a designated academic operator and specific terminal subject code to your project architecture</p>
         </div>
 
-        {/* Tabs */}
-        <div style={{ display:'flex',gap:4,marginBottom:24,background:'rgba(15,23,42,0.9)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:14,padding:6,animation:'fadeUp 0.4s ease 0.1s both' }}>
+        {/* Global Pipeline Tabs Wrapper */}
+        <div className="flex gap-1.5 mb-8 bg-[#0b1324]/90 border border-white/[0.06] rounded-2xl p-1.5 shadow-xl shadow-black/10">
           {[
-            { key:'assign',   label:'📋 New Request' },
-            { key:'requests', label:`📊 My Requests (${myRequests.length})` },
-          ].map(tab=>(
-            <button key={tab.key} onClick={()=>setActiveTab(tab.key)} style={{ flex:1,background:activeTab===tab.key?'rgba(99,102,241,0.2)':'transparent',border:`1px solid ${activeTab===tab.key?'rgba(99,102,241,0.3)':'transparent'}`,borderRadius:10,padding:'10px',color:activeTab===tab.key?'#818cf8':'#64748b',cursor:'pointer',fontFamily:'Syne,sans-serif',fontWeight:600,fontSize:13,transition:'all 0.2s' }}>
+            { key: 'assign',   label: '📋 Initialize Vector Request' },
+            { key: 'requests', label: `📊 Pipeline Logs (${myRequests.length})` },
+          ].map(tab => (
+            <button 
+              key={tab.key} 
+              onClick={() => setActiveTab(tab.key)} 
+              className={`flex-1 font-syne font-bold text-xs uppercase tracking-wider py-3 rounded-xl transition-all duration-200 cursor-pointer border ${
+                activeTab === tab.key 
+                  ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400 shadow-md shadow-indigo-500/5' 
+                  : 'bg-transparent border-transparent text-slate-500 hover:text-slate-400'
+              }`}
+            >
               {tab.label}
             </button>
           ))}
         </div>
 
-        {/* ── ASSIGN TAB ── */}
-        {activeTab==='assign' && (
-          <div style={{ animation:'fadeUp 0.4s ease' }}>
+        {/* ── INTERACTIVE ASSIGNMENT MATRIX BLOCK ── */}
+        {activeTab === 'assign' && (
+          <div className="animate-fadeUp space-y-5">
 
             {projects.length === 0 ? (
-              <div style={{ textAlign:'center',padding:'60px',background:'rgba(15,23,42,0.9)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:24 }}>
-                <div style={{ fontSize:48,opacity:0.2,marginBottom:12 }}>📁</div>
-                <p style={{ color:'#475569',fontSize:15 }}>Pehle project banao!</p>
-                <button onClick={()=>navigate('/student/projects')} style={{ marginTop:16,background:'linear-gradient(135deg,#6366f1,#818cf8)',border:'none',borderRadius:10,padding:'10px 24px',color:'white',cursor:'pointer',fontFamily:'Syne,sans-serif',fontWeight:600 }}>Create Project →</button>
+              <div className="text-center py-20 bg-[#0b1324]/60 backdrop-blur-md border border-white/[0.05] rounded-3xl shadow-xl shadow-black/20">
+                <div className="text-5xl opacity-20 mb-4 animate-pulse">📁</div>
+                <h3 className="text-base font-bold text-slate-400">No Target Framework Configured</h3>
+                <p className="text-slate-600 text-xs font-semibold mt-1">Please build or register a structural project cluster pipeline first.</p>
+                <button 
+                  onClick={() => navigate('/student/projects')} 
+                  className="mt-6 bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold text-xs uppercase tracking-wider px-6 py-3 rounded-xl hover:opacity-95 transition-all shadow-md shadow-indigo-500/20 active:scale-95"
+                >
+                  Create Project →
+                </button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} style={{ display:'flex',flexDirection:'column',gap:20 }}>
+              <form onSubmit={handleSubmit} className="space-y-5">
 
-                {/* Step 1 — Project Select */}
-                <div style={{ background:'rgba(15,23,42,0.9)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:18,padding:20 }}>
-                  <div style={{ color:'#6366f1',fontSize:12,fontWeight:600,letterSpacing:2,textTransform:'uppercase',marginBottom:12 }}>Step 1 — Select Project</div>
-                  <div style={{ display:'flex',flexDirection:'column',gap:8 }}>
-                    {projects.map(p=>(
-                      <div key={p._id} onClick={()=>setForm({...form,projectId:p._id})} style={{ background:form.projectId===p._id?'rgba(99,102,241,0.12)':'rgba(255,255,255,0.03)',border:`1px solid ${form.projectId===p._id?'#6366f1':'rgba(255,255,255,0.07)'}`,borderRadius:12,padding:'14px 16px',cursor:'pointer',transition:'all 0.2s' }}>
-                        <div style={{ color:'#f1f5f9',fontSize:14,fontWeight:600 }}>{p.title}</div>
-                        <div style={{ color:'#64748b',fontSize:12,marginTop:3 }}>{p.category} • {p.techStack?.slice(0,3).join(', ')}</div>
+                {/* Step 1 — Project Target Cluster Allocation */}
+                <div className="bg-[#0b1324]/60 backdrop-blur-md border border-white/[0.05] rounded-2xl p-5 shadow-xl shadow-black/10">
+                  <div className="text-indigo-400 text-[10px] font-extrabold tracking-widest uppercase mb-4">Step 01 // Target Framework Assignment</div>
+                  <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-white/5">
+                    {projects.map(p => (
+                      <div 
+                        key={p._id} 
+                        onClick={() => setForm({ ...form, projectId: p._id })} 
+                        className={`border rounded-xl p-4 cursor-pointer transition-all duration-200 group ${
+                          form.projectId === p._id 
+                            ? 'bg-indigo-500/10 border-indigo-500/40 shadow-md shadow-indigo-500/5' 
+                            : 'bg-white/[0.02] border-white/[0.06] hover:border-indigo-500/20 hover:bg-white/[0.04]'
+                        }`}
+                      >
+                        <div className={`font-bold text-sm transition-colors ${form.projectId === p._id ? 'text-indigo-400' : 'text-slate-200'}`}>{p.title}</div>
+                        <div className="text-slate-500 text-xs font-medium mt-1.5 flex items-center gap-2">
+                          <span className="bg-white/5 px-2 py-0.5 border border-white/5 rounded-md text-[10px]">{p.category}</span>
+                          <span>•</span>
+                          <span className="font-mono text-slate-400">{p.techStack?.slice(0, 3).join(', ')}</span>
+                        </div>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* Step 2 — Subject + Teacher Select */}
-                <div style={{ background:'rgba(15,23,42,0.9)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:18,padding:20 }}>
-                  <div style={{ color:'#f59e0b',fontSize:12,fontWeight:600,letterSpacing:2,textTransform:'uppercase',marginBottom:14 }}>Step 2 — Select Subject & Teacher</div>
+                {/* Step 2 — Subject Blueprint Selector & Query Filter */}
+                <div className="bg-[#0b1324]/60 backdrop-blur-md border border-white/[0.05] rounded-2xl p-5 shadow-xl shadow-black/10">
+                  <div className="text-amber-400 text-[10px] font-extrabold tracking-widest uppercase mb-4">Step 02 // Subject Domain & Academic Node Filter</div>
 
-                  {/* Filters */}
-                  <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:16 }}>
+                  {/* Operational Dropdown Filters */}
+                  <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
-                      <label style={{ fontSize:12,color:'#475569',marginBottom:6,display:'block' }}>Filter by Department</label>
-                      <select value={filters.department} onChange={e=>setFilters({...filters,department:e.target.value})} className="custom-input">
-                        <option value="">All Departments</option>
-                        {['CSE','ECE','ME','CE','IT'].map(d=><option key={d}>{d}</option>)}
+                      <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 block mb-2">Division Department</label>
+                      <select 
+                        value={filters.department} 
+                        onChange={e => setFilters({ ...filters, department: e.target.value })} 
+                        className="w-full bg-[#070b14]/90 border border-white/10 text-slate-300 font-medium text-xs rounded-xl px-4 py-3 cursor-pointer outline-none focus:border-indigo-500/30 transition-all"
+                      >
+                        <option value="" style={{ background: '#070b14' }}>All Departments</option>
+                        {['CSE', 'ECE', 'ME', 'CE', 'IT'].map(d => <option key={d} value={d} style={{ background: '#070b14' }}>{d} Framework</option>)}
                       </select>
                     </div>
                     <div>
-                      <label style={{ fontSize:12,color:'#475569',marginBottom:6,display:'block' }}>Filter by Semester</label>
-                      <select value={filters.semester} onChange={e=>setFilters({...filters,semester:e.target.value})} className="custom-input">
-                        <option value="">All Semesters</option>
-                        {[1,2,3,4,5,6,7,8].map(s=><option key={s} value={s}>Semester {s}</option>)}
+                      <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 block mb-2">Target Semester Sequence</label>
+                      <select 
+                        value={filters.semester} 
+                        onChange={e => setFilters({ ...filters, semester: e.target.value })} 
+                        className="w-full bg-[#070b14]/90 border border-white/10 text-slate-300 font-medium text-xs rounded-xl px-4 py-3 cursor-pointer outline-none focus:border-indigo-500/30 transition-all"
+                      >
+                        <option value="" style={{ background: '#070b14' }}>All Semesters</option>
+                        {[1, 2, 3, 4, 5, 6, 7, 8].map(s => <option key={s} value={s} style={{ background: '#070b14' }}>Term Stage 0{s}</option>)}
                       </select>
                     </div>
                   </div>
 
-                  {subjects.length===0 ? (
-                    <div style={{ textAlign:'center',padding:'24px',color:'#334155',fontSize:13 }}>
-                      Koi subject available nahi is filter mein.
+                  {subjects.length === 0 ? (
+                    <div className="text-center py-8 text-slate-500 text-xs font-semibold">
+                      No operational subject blocks matched current filter state variables.
                     </div>
                   ) : (
-                    <div style={{ display:'flex',flexDirection:'column',gap:8,maxHeight:320,overflowY:'auto' }}>
-                      {subjects.map(s=>(
-                        <div key={s._id} className={`sub-item ${form.subjectId===s._id?'selected':''}`} onClick={()=>setForm({...form,subjectId:s._id})} style={{ background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:12,padding:'14px 16px',cursor:'pointer',transition:'all 0.2s' }}>
-                          <div style={{ display:'flex',justifyContent:'space-between',alignItems:'flex-start' }}>
+                    <div className="space-y-2.5 max-h-[300px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-white/5">
+                      {subjects.map(s => (
+                        <div 
+                          key={s._id} 
+                          onClick={() => setForm({ ...form, subjectId: s._id })} 
+                          className={`border rounded-xl p-4 cursor-pointer transition-all duration-200 group ${
+                            form.subjectId === s._id 
+                              ? 'bg-amber-500/5 border-amber-500/40 shadow-md shadow-amber-500/5' 
+                              : 'bg-white/[0.02] border-white/[0.06] hover:border-amber-500/20 hover:bg-white/[0.04]'
+                          }`}
+                        >
+                          <div className="flex justify-between items-start gap-4">
                             <div>
-                              <div style={{ color:'#f1f5f9',fontSize:14,fontWeight:600 }}>{s.name}</div>
-                              <div style={{ color:'#f59e0b',fontSize:12,fontWeight:600,marginTop:2 }}>{s.code}</div>
-                              <div style={{ color:'#64748b',fontSize:12,marginTop:4 }}>👨‍🏫 {s.teacher?.name} • {s.department} • Sem {s.semester}</div>
+                              <div className={`font-bold text-sm transition-colors ${form.subjectId === s._id ? 'text-amber-400' : 'text-slate-200'}`}>{s.name}</div>
+                              <div className="text-amber-500/80 font-mono text-xs font-bold tracking-wider mt-1">{s.code}</div>
+                              <div className="text-slate-500 text-xs font-medium mt-2 flex items-center flex-wrap gap-x-2 gap-y-1">
+                                <span className="text-slate-400 font-semibold">👨‍🏫 {s.teacher?.name}</span>
+                                <span>•</span>
+                                <span>Dept: {s.department}</span>
+                                <span>•</span>
+                                <span>Sem {s.semester}</span>
+                              </div>
                             </div>
-                            <div style={{ textAlign:'right' }}>
-                              <span style={{ background:'rgba(34,211,238,0.1)',color:'#22d3ee',padding:'3px 10px',borderRadius:20,fontSize:11 }}>⭐ {s.credits} cr</span>
-                              <div style={{ color:'#475569',fontSize:11,marginTop:4 }}>{s.enrolledStudents?.length||0} enrolled</div>
+                            <div className="text-right flex flex-col items-end gap-1.5 flex-shrink-0">
+                              <span className="bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono">
+                                {s.credits} CR
+                              </span>
+                              <div className="text-slate-600 text-[10px] font-bold uppercase tracking-wider">{s.enrolledStudents?.length || 0} Synced</div>
                             </div>
                           </div>
                         </div>
@@ -190,82 +237,121 @@ export default function AssignTeacher() {
                   )}
                 </div>
 
-                {/* Selected Subject Info */}
+                {/* Active Dynamic Preview Blueprint */}
                 {selectedSubject && (
-                  <div style={{ background:'rgba(245,158,11,0.06)',border:'1px solid rgba(245,158,11,0.2)',borderRadius:14,padding:16 }}>
-                    <div style={{ color:'#f59e0b',fontSize:12,fontWeight:600,marginBottom:8 }}>✅ Selected:</div>
-                    <div style={{ color:'#f1f5f9',fontSize:14,fontWeight:600 }}>{selectedSubject.name} — {selectedSubject.code}</div>
-                    <div style={{ color:'#94a3b8',fontSize:13,marginTop:4 }}>Teacher: {selectedSubject.teacher?.name} | {selectedSubject.department} | Sem {selectedSubject.semester}</div>
+                  <div className="bg-amber-500/5 border border-amber-500/20 rounded-2xl p-4 flex items-start gap-3 shadow-inner">
+                    <div className="text-amber-500 text-base leading-none pt-0.5">⚡</div>
+                    <div>
+                      <div className="text-xs font-bold text-amber-500 uppercase tracking-wider">Dynamic State Binding Target:</div>
+                      <div className="text-slate-200 font-bold text-sm mt-1">{selectedSubject.name} — <span className="font-mono">{selectedSubject.code}</span></div>
+                      <div className="text-slate-500 text-xs font-medium mt-1">Host Node Authority: {selectedSubject.teacher?.name} | Channel Stack {selectedSubject.department}</div>
+                    </div>
                   </div>
                 )}
 
-                {/* Step 3 — Mentor (Optional) */}
-                <div style={{ background:'rgba(15,23,42,0.9)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:18,padding:20 }}>
-                  <div style={{ color:'#22d3ee',fontSize:12,fontWeight:600,letterSpacing:2,textTransform:'uppercase',marginBottom:12 }}>Step 3 — Select Mentor (Optional)</div>
-                  <select value={form.mentorId} onChange={e=>setForm({...form,mentorId:e.target.value})} className="custom-input">
-                    <option value="">No mentor chahiye</option>
-                    {mentors.map(m=>(
-                      <option key={m._id} value={m._id}>{m.name} — {m.organization} ({m.expertise?.slice(0,2).join(', ')})</option>
+                {/* Step 3 — Optional Mentor Framework Alignment */}
+                <div className="bg-[#0b1324]/60 backdrop-blur-md border border-white/[0.05] rounded-2xl p-5 shadow-xl shadow-black/10">
+                  <div className="text-cyan-400 text-[10px] font-extrabold tracking-widest uppercase mb-3">Step 03 // External Advisory Mentor Framework (Optional)</div>
+                  <select 
+                    value={form.mentorId} 
+                    onChange={e => setForm({ ...form, mentorId: e.target.value })} 
+                    className="w-full bg-[#070b14]/90 border border-white/10 text-slate-300 font-medium text-xs rounded-xl px-4 py-3 cursor-pointer outline-none focus:border-indigo-500/30 transition-all"
+                  >
+                    <option value="" style={{ background: '#070b14' }}>Bypass Mentor Framework Allocation</option>
+                    {mentors.map(m => (
+                      <option key={m._id} value={m._id} style={{ background: '#070b14' }}>
+                        {m.name} — {m.organization} ({m.expertise?.slice(0, 2).join(', ')})
+                      </option>
                     ))}
                   </select>
                 </div>
 
-                {/* Step 4 — Message */}
-                <div style={{ background:'rgba(15,23,42,0.9)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:18,padding:20 }}>
-                  <div style={{ color:'#10b981',fontSize:12,fontWeight:600,letterSpacing:2,textTransform:'uppercase',marginBottom:12 }}>Step 4 — Message to Teacher (Optional)</div>
-                  <textarea value={form.message} onChange={e=>setForm({...form,message:e.target.value})} placeholder="Teacher ko koi baat batana chahte ho? e.g. Project idea, special requirements..." className="custom-input" rows={3} style={{ resize:'vertical' }} />
+                {/* Step 4 — Request Message Data Stream Block */}
+                <div className="bg-[#0b1324]/60 backdrop-blur-md border border-white/[0.05] rounded-2xl p-5 shadow-xl shadow-black/10">
+                  <div className="text-emerald-400 text-[10px] font-extrabold tracking-widest uppercase mb-3">Step 04 // Request Payload Description Data (Optional)</div>
+                  <textarea 
+                    value={form.message} 
+                    onChange={e => setForm({ ...form, message: e.target.value })} 
+                    placeholder="Provide additional scope metrics, structural requirements, or dynamic repository specifications to the target host operator..." 
+                    className="w-full bg-[#070b14]/90 border border-white/10 text-slate-300 placeholder-slate-600 font-medium text-xs rounded-xl px-4 py-3 outline-none focus:border-indigo-500/30 transition-all resize-y font-sans" 
+                    rows={3} 
+                  />
                 </div>
 
-                <button type="submit" disabled={submitting||!form.projectId||!form.subjectId} className="btn-primary" style={{ opacity:(!form.projectId||!form.subjectId)?0.5:1 }}>
-                  {submitting ? 'Sending Request...' : 'Send Request to Teacher →'}
+                {/* Global Commit Execute Command Button */}
+                <button 
+                  type="submit" 
+                  disabled={submitting || !form.projectId || !form.subjectId} 
+                  className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 disabled:from-slate-800 disabled:to-slate-800 text-white disabled:text-slate-600 font-bold text-xs uppercase tracking-widest py-4 rounded-xl hover:opacity-95 disabled:opacity-50 transition-all shadow-lg disabled:shadow-none shadow-indigo-500/10 active:scale-[0.99]"
+                >
+                  {submitting ? 'Broadcasting Vector Parameters...' : 'Broadcast Authorization Request Stream →'}
                 </button>
               </form>
             )}
           </div>
         )}
 
-        {/* ── REQUESTS TAB ── */}
-        {activeTab==='requests' && (
-          <div style={{ animation:'fadeUp 0.4s ease' }}>
-            {myRequests.length===0 ? (
-              <div style={{ textAlign:'center',padding:'60px',background:'rgba(15,23,42,0.9)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:24 }}>
-                <div style={{ fontSize:48,opacity:0.2,marginBottom:12 }}>📋</div>
-                <p style={{ color:'#475569',fontSize:15 }}>Koi request nahi bheji abhi.</p>
+        {/* ── SYSTEM REQUESTS DEPLOYED QUEUE PIPELINE TAB ── */}
+        {activeTab === 'requests' && (
+          <div className="animate-fadeUp">
+            {myRequests.length === 0 ? (
+              <div className="text-center py-20 bg-[#0b1324]/60 backdrop-blur-md border border-white/[0.05] rounded-3xl shadow-xl shadow-black/20">
+                <div className="text-5xl opacity-20 mb-4 animate-pulse">📋</div>
+                <h3 className="text-base font-bold text-slate-400">Request Queue Empty</h3>
+                <p className="text-slate-600 text-xs font-semibold mt-1">No transaction payloads have been structured or dispatched yet.</p>
               </div>
             ) : (
-              <div style={{ display:'flex',flexDirection:'column',gap:14 }}>
-                {myRequests.map((r,i)=>{
-                  const st = STATUS_MAP[r.status]||STATUS_MAP.pending
+              <div className="space-y-4">
+                {myRequests.map((r, i) => {
+                  const st = STATUS_MAP[r.status] || STATUS_MAP.pending
                   return (
-                    <div key={r._id} style={{ background:'rgba(15,23,42,0.9)',border:`1px solid ${r.status==='approved'?'rgba(16,185,129,0.2)':r.status==='rejected'?'rgba(239,68,68,0.15)':'rgba(255,255,255,0.06)'}`,borderRadius:18,padding:20,animation:`fadeUp 0.4s ease ${i*0.06}s both` }}>
-                      <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14 }}>
-                        <h3 style={{ fontFamily:'Syne,sans-serif',color:'#f1f5f9',fontSize:16,fontWeight:700,margin:0 }}>{r.project?.title}</h3>
-                        <span style={{ background:st.bg,color:st.color,padding:'4px 14px',borderRadius:20,fontSize:12,fontWeight:600 }}>{st.label}</span>
+                    <div 
+                      key={r._id} 
+                      className={`bg-[#0b1324]/60 backdrop-blur-md border rounded-2xl p-5 shadow-xl shadow-black/10 transition-all duration-300 ${
+                        r.status === 'approved' 
+                          ? 'border-emerald-500/20 shadow-emerald-500/[0.02]' 
+                          : r.status === 'rejected' 
+                          ? 'border-red-500/10' 
+                          : 'border-white/[0.05]'
+                      }`}
+                      style={{ animationDelay: `${i * 0.05}s` }}
+                    >
+                      {/* Queue Header Metadata Block */}
+                      <div className="flex justify-between items-start gap-4 mb-4">
+                        <h3 className="font-syne text-slate-200 font-bold text-base tracking-tight leading-snug">{r.project?.title}</h3>
+                        <span className={`px-3 py-1 border rounded-full text-[10px] font-extrabold uppercase tracking-wider inline-block shrink-0 ${st.bg} ${st.color}`}>
+                          {st.label}
+                        </span>
                       </div>
 
-                      <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:10 }}>
-                        <div style={{ background:'rgba(245,158,11,0.06)',border:'1px solid rgba(245,158,11,0.12)',borderRadius:10,padding:'10px 12px' }}>
-                          <div style={{ color:'#475569',fontSize:11,marginBottom:3 }}>SUBJECT</div>
-                          <div style={{ color:'#f59e0b',fontSize:13,fontWeight:700 }}>{r.subject?.code}</div>
-                          <div style={{ color:'#94a3b8',fontSize:12 }}>{r.subject?.name}</div>
+                      {/* Distributed Node Parameters Information Matrix Grid */}
+                      <div className="grid grid-cols-2 gap-3 mb-3.5">
+                        <div className="bg-amber-500/[0.02] border border-amber-500/10 rounded-xl p-3">
+                          <div className="text-slate-500 text-[9px] font-extrabold tracking-wider uppercase mb-1">Bounded Subject System</div>
+                          <div className="text-amber-500 font-mono text-xs font-bold">{r.subject?.code}</div>
+                          <div className="text-slate-400 text-xs font-medium truncate mt-0.5">{r.subject?.name}</div>
                         </div>
-                        <div style={{ background:'rgba(99,102,241,0.06)',border:'1px solid rgba(99,102,241,0.12)',borderRadius:10,padding:'10px 12px' }}>
-                          <div style={{ color:'#475569',fontSize:11,marginBottom:3 }}>TEACHER</div>
-                          <div style={{ color:'#818cf8',fontSize:13,fontWeight:600 }}>{r.teacher?.name}</div>
-                          <div style={{ color:'#64748b',fontSize:12 }}>{r.teacher?.department}</div>
+                        <div className="bg-indigo-500/[0.02] border border-indigo-500/10 rounded-xl p-3">
+                          <div className="text-slate-500 text-[9px] font-extrabold tracking-wider uppercase mb-1">Target Host Operator</div>
+                          <div className="text-indigo-400 font-bold text-xs">{r.teacher?.name}</div>
+                          <div className="text-slate-400 text-xs font-medium truncate mt-0.5">Faculty // {r.teacher?.department}</div>
                         </div>
                       </div>
 
+                      {/* Deployed Faculty Execution Remarks Data Stream */}
                       {r.teacherRemarks && (
-                        <div style={{ background:r.status==='approved'?'rgba(16,185,129,0.06)':'rgba(239,68,68,0.06)',border:`1px solid ${r.status==='approved'?'rgba(16,185,129,0.15)':'rgba(239,68,68,0.15)'}`,borderRadius:10,padding:'8px 14px' }}>
-                          <span style={{ color:r.status==='approved'?'#10b981':'#ef4444',fontSize:12 }}>
-                            💬 Teacher: "{r.teacherRemarks}"
+                        <div className={`border rounded-xl p-3 text-xs font-medium leading-relaxed mb-3.5 ${
+                          r.status === 'approved' ? 'bg-emerald-500/[0.02] border-emerald-500/15' : 'bg-red-500/[0.02] border-red-500/15'
+                        }`}>
+                          <span className={r.status === 'approved' ? 'text-emerald-400' : 'text-red-400'}>
+                            💬 Operator Logs: "{r.teacherRemarks}"
                           </span>
                         </div>
                       )}
 
-                      <div style={{ marginTop:10,color:'#334155',fontSize:11 }}>
-                        {new Date(r.createdAt).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}
+                      {/* Dispatch Synchronization Time Execution Node */}
+                      <div className="text-slate-600 font-mono text-[10px] font-bold uppercase tracking-wider">
+                        Timestamp: {new Date(r.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </div>
                     </div>
                   )

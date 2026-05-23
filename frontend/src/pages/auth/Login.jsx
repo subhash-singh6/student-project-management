@@ -40,68 +40,96 @@ export default function Login() {
   };
 
   return (
-    <div className="auth-bg min-h-screen flex items-center justify-center px-4">
-      <div className="glass-card relative z-10 w-full max-w-md p-8">
-        <div className="fade-in mb-8 pt-5 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-cyan-400 text-2xl">
+    <div className="min-h-screen bg-[#060A12] text-[#f8fafc] font-sans flex items-center justify-center px-4 relative overflow-hidden selection:bg-amber-500/25 selection:text-[#f8fafc]">
+      
+      {/* ── Global Custom Animations Injection ──────────────── */}
+      <style>{`
+        @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes pulseGlow { 0%,100% { opacity:0.5; transform:scale(1); } 50% { opacity:0.8; transform:scale(1.06); } }
+        
+        .fade-up-1 { animation: fadeUp 0.5s ease both; }
+        .fade-up-2 { animation: fadeUp 0.5s ease 0.10s both; }
+        .fade-up-3 { animation: fadeUp 0.5s ease 0.15s both; }
+        .fade-up-4 { animation: fadeUp 0.5s ease 0.20s both; }
+        .animate-pulse-glow { animation: pulseGlow 8s ease-in-out infinite; }
+        .animate-pulse-glow-delayed { animation: pulseGlow 10s ease-in-out infinite 2s; }
+      `}</style>
+
+      {/* ── Ambient Background Blobs ───────────────────────── */}
+      <div aria-hidden className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+        <div className="absolute -top-[10%] -left-[10%] w-[450px] h-[450px] rounded-full bg-gradient-to-br from-amber-500/5 to-transparent blur-[70px] animate-pulse-glow" />
+        <div className="absolute -bottom-[10%] -right-[10%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-indigo-500/5 to-transparent blur-[80px] animate-pulse-glow-delayed" />
+      </div>
+
+      {/* ── Main Login Card ────────────────────────────────── */}
+      <div className="relative z-10 w-full max-w-md bg-white/[0.03] border border-white/5 backdrop-blur-xl rounded-3xl p-8 shadow-2xl shadow-black/40">
+        
+        <div className="fade-up-1 mb-6 text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#f59e0b] to-[#f97316] text-2xl shadow-lg shadow-amber-500/20">
             🎓
           </div>
-          <h1 className="text-3xl font-bold text-slate-100">Welcome Back</h1>
-          <p className="mt-2 mb-4 text-sm text-slate-400">
+          <h1 className="text-3xl font-bold tracking-tight text-[#f8fafc]">Welcome Back</h1>
+          <p className="mt-2 text-sm text-[#64748b]">
             SPMS — Student Project Management System
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-5">
-          <div className="fade-in-2">
-            <label className="mb-2 block text-sm text-slate-400">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          {/* Email Field */}
+          <div className="fade-up-2">
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-[#64748b]">
               Email Address
             </label>
             <input
               type="email"
               name="email"
-              placeholder="Enter your email"
+              placeholder="Enter your email address"
               value={form.email}
               onChange={handleChange}
-              className="custom-input"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-[#f8fafc] placeholder-[#334155] focus:outline-none focus:border-amber-500/40 focus:bg-white/[0.07] transition-all duration-200"
             />
           </div>
 
-          <div className="fade-in-3 relative">
-            <label className="mb-2 block text-sm text-slate-400">
+          {/* Password Field */}
+          <div className="fade-up-3 relative">
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-[#64748b]">
               Password
             </label>
             <input
               type={showPass ? "text" : "password"}
               name="password"
-              placeholder="password"
+              placeholder="Enter your account password"
               value={form.password}
               onChange={handleChange}
-              className="custom-input pr-12"
+              className="w-full bg-white/5 border border-white/10 rounded-xl pl-4 pr-12 py-3 text-sm text-[#f8fafc] placeholder-[#334155] focus:outline-none focus:border-amber-500/40 focus:bg-white/[0.07] transition-all duration-200"
             />
             <button
               type="button"
               onClick={() => setShowPass(!showPass)}
-              className="absolute right-3 top-9 text-base text-slate-400"
+              className="absolute right-4 bottom-3 text-base text-[#64748b] hover:text-[#cbd5e1] transition-colors focus:outline-none"
             >
               {showPass ? "🙈" : "👁️"}
             </button>
           </div>
 
-          <div className="fade-in-4 mt-2">
-            <button type="submit" className="btn-primary" disabled={loading}>
+          {/* Submit Action */}
+          <div className="fade-up-4 mt-2">
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full inline-flex items-center justify-center px-6 py-3.5 text-sm font-bold text-white bg-gradient-to-br from-[#f59e0b] to-[#f97316] rounded-xl shadow-lg shadow-amber-500/25 hover:scale-[1.01] hover:shadow-amber-500/40 transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none"
+            >
               {loading ? "Logging in..." : "Login →"}
             </button>
           </div>
         </form>
 
-        <div className="mt-6 mb-5 text-center">
-          <span className="text-sm text-slate-400">
-            Don't have an account?{" "}
-          </span>
+        {/* Form Footer Link */}
+        <div className="mt-8 text-center text-sm text-[#64748b]">
+          Don't have an account?{" "}
           <Link
             to="/register"
-            className="text-sm font-semibold text-indigo-400 no-underline"
+            className="font-semibold text-[#fbbf24] hover:text-[#f59e0b] transition-colors no-underline ml-1"
           >
             Sign up
           </Link>

@@ -18,6 +18,7 @@ import MyTeam from "../pages/student/MyTeam";
 import TeamChat from "../pages/student/TeamChat";
 import KanbanBoard from "../pages/student/KanbanBoard";
 import AssignTeacher from "../pages/student/AssignTeacher";
+import ProjectDetails from "../pages/student/ProjectDetails"; // ✅ Import clean kar diya hai
 
 // Mentor
 import MentorDashboard from "../pages/mentor/MentorDashboard";
@@ -65,6 +66,7 @@ export default function AppRoutes() {
         }
       />
 
+      {/* ── STUDENT ROUTES CONTROL BLOCK ── */}
       <Route
         path="/student/dashboard"
         element={
@@ -81,6 +83,17 @@ export default function AppRoutes() {
           </PrivateRoute>
         }
       />
+      
+      {/* 👇 YE NAYA DYNAMIC ROUTE ADD KAR DIYA HAI */}
+      <Route
+        path="/student/project/:id"
+        element={
+          <PrivateRoute allowedRoles={["student"]}>
+            <ProjectDetails />
+          </PrivateRoute>
+        }
+      />
+
       <Route
         path="/student/team"
         element={
@@ -114,6 +127,7 @@ export default function AppRoutes() {
         }
       />
 
+      {/* ── MENTOR ROUTES CONTROL BLOCK ── */}
       <Route
         path="/mentor/dashboard"
         element={
@@ -139,6 +153,7 @@ export default function AppRoutes() {
         }
       />
 
+      {/* ── TEACHER ROUTES CONTROL BLOCK ── */}
       <Route
         path="/teacher/dashboard"
         element={

@@ -9,16 +9,16 @@ import PageLoader from '../../components/PageLoader'
 import toast from 'react-hot-toast'
 
 const COLUMNS = [
-  { id: 'todo', title: '📋 To Do', color: '#6366f1', bg: 'rgba(99,102,241,0.08)' },
-  { id: 'inprogress', title: '🔄 In Progress', color: '#f59e0b', bg: 'rgba(245,158,11,0.08)' },
-  { id: 'review', title: '👀 In Review', color: '#22d3ee', bg: 'rgba(34,211,238,0.08)' },
-  { id: 'done', title: '✅ Done', color: '#10b981', bg: 'rgba(16,185,129,0.08)' },
+  { id: 'todo', title: '📋 To Do', border: 'group-hover:border-indigo-500/20', text: 'text-indigo-400', badge: 'bg-indigo-500/10 border-indigo-500/20' },
+  { id: 'inprogress', title: '🔄 In Progress', border: 'group-hover:border-amber-500/20', text: 'text-amber-400', badge: 'bg-amber-500/10 border-amber-500/20' },
+  { id: 'review', title: '👀 In Review', border: 'group-hover:border-cyan-500/20', text: 'text-cyan-400', badge: 'bg-cyan-500/10 border-cyan-500/20' },
+  { id: 'done', title: '✅ Done', border: 'group-hover:border-emerald-500/20', text: 'text-emerald-400', badge: 'bg-emerald-500/10 border-emerald-500/20' },
 ]
 
 const PRIORITIES = [
-  { value: 'low', color: '#10b981', label: 'Low' },
-  { value: 'medium', color: '#f59e0b', label: 'Medium' },
-  { value: 'high', color: '#ef4444', label: 'High' },
+  { value: 'low', theme: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20', label: 'Low' },
+  { value: 'medium', theme: 'text-amber-400 bg-amber-500/10 border-amber-500/20', label: 'Medium' },
+  { value: 'high', theme: 'text-red-400 bg-red-500/10 border-red-500/20', label: 'High' },
 ]
 
 export default function KanbanBoard() {
@@ -55,7 +55,7 @@ export default function KanbanBoard() {
   }
 
   const addTask = async (colId) => {
-    if (!newTask.title.trim()) return toast.error('Task title zaroori hai!')
+    if (!newTask.title.trim()) return toast.error('Task title token required!')
     try {
       await taskService.create({
         projectId: selectedProject,
@@ -66,10 +66,10 @@ export default function KanbanBoard() {
       })
       setShowAdd(null)
       setNewTask({ title: '', priority: 'medium', assignee: '' })
-      toast.success('Task saved to database! ✅')
+      toast.success('Task commit saved to node database! ✅')
       loadTasks(selectedProject)
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Task add failed')
+      toast.error(err.response?.data?.message || 'Task compilation failed')
     }
   }
 
@@ -78,7 +78,7 @@ export default function KanbanBoard() {
       await taskService.remove(taskId)
       loadTasks(selectedProject)
     } catch {
-      toast.error('Delete failed')
+      toast.error('Task execution drop failed')
     }
   }
 
@@ -95,9 +95,9 @@ export default function KanbanBoard() {
     try {
       await taskService.move(taskId, { column: toCol })
       await loadTasks(selectedProject)
-      toast.success(`Moved to ${COLUMNS.find((c) => c.id === toCol)?.title}`)
+      toast.success(`Task shifted to terminal matrix block.`)
     } catch {
-      toast.error('Move failed')
+      toast.error('Task reassignment shift failed')
     }
     setDragTask(null)
     setDragFrom(null)
@@ -111,182 +111,121 @@ export default function KanbanBoard() {
 
   return (
     <DashboardLayout
-      title="Kanban Board"
-      subtitle="Tasks persist in MongoDB"
+      title="Sprint Operations Board"
+      subtitle="Distributed workflow state synchronization"
       portalLabel="Student Portal"
     >
-      <div style={{ fontFamily: "'DM Sans', sans-serif", overflowX: 'auto' }}>
-        <style>{`
-          @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-          .task-card{cursor:grab !important;}
-          .task-card:active{cursor:grabbing !important;opacity:0.7;}
-          .task-card:hover{border-color:rgba(99,102,241,0.3) !important;transform:translateY(-2px);}
-        `}</style>
-
-        <div style={{ minWidth: 900, padding: '8px 0' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-            <select
-              value={selectedProject}
-              onChange={(e) => setSelectedProject(e.target.value)}
-              style={{
-                background: 'rgba(15,23,42,0.9)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: 10,
-                padding: '8px 14px',
-                color: '#94a3b8',
-                fontSize: 13,
-                cursor: 'pointer',
-                outline: 'none',
-              }}
-            >
-              {projects.map((p) => (
-                <option key={p._id} value={p._id}>
-                  {p.title}
-                </option>
-              ))}
-            </select>
-            {loadingTasks && <span style={{ color: '#64748b', fontSize: 12 }}>Syncing tasks...</span>}
+      <div className="overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-white/5 font-sans">
+        <div className="min-w-[1000px] py-2">
+          
+          {/* Top Board Action Metrics Bar */}
+          <div className="flex items-center justify-between gap-6 mb-6">
+            <div className="flex items-center gap-3">
+              <select
+                value={selectedProject}
+                onChange={(e) => setSelectedProject(e.target.value)}
+                className="bg-[#0b1324]/90 border border-white/5 focus:border-indigo-500/30 text-slate-300 font-medium text-sm rounded-xl px-4 py-2.5 cursor-pointer outline-none transition-all"
+              >
+                {projects.map((p) => (
+                  <option key={p._id} value={p._id} style={{ background: '#070b14' }}>
+                    {p.title}
+                  </option>
+                ))}
+              </select>
+              {loadingTasks && (
+                <span className="text-slate-500 text-xs font-bold uppercase tracking-widest animate-pulse">
+                  Syncing operational logs...
+                </span>
+              )}
+            </div>
           </div>
 
+          {/* Core Sprint Velocity Progress Tracker */}
           {totalTasks > 0 && (
-            <div
-              style={{
-                background: 'rgba(15,23,42,0.9)',
-                border: '1px solid rgba(255,255,255,0.06)',
-                borderRadius: 14,
-                padding: '14px 20px',
-                marginBottom: 20,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 16,
-              }}
-            >
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                  <span style={{ color: '#94a3b8', fontSize: 13 }}>Overall Progress</span>
-                  <span style={{ color: '#10b981', fontWeight: 700, fontSize: 13 }}>{progress}%</span>
+            <div className="bg-[#0b1324]/60 backdrop-blur-md border border-white/[0.04] rounded-2xl p-4 mb-6 flex items-center gap-6 shadow-xl shadow-black/10">
+              <div className="flex-1">
+                <div className="flex justify-between items-center mb-2 text-xs font-semibold">
+                  <span className="text-slate-500 uppercase tracking-wider text-[10px] font-extrabold">Overall Task Velocity</span>
+                  <span className="text-emerald-400 font-mono text-sm font-bold">{progress}%</span>
                 </div>
-                <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 99, height: 8 }}>
+                <div className="bg-white/[0.03] border border-white/5 rounded-full h-2 overflow-hidden p-[1px]">
                   <div
-                    style={{
-                      background: 'linear-gradient(135deg,#6366f1,#10b981)',
-                      borderRadius: 99,
-                      height: '100%',
-                      width: `${progress}%`,
-                      transition: 'width 0.5s ease',
-                    }}
+                    className="bg-gradient-to-r from-indigo-500 to-emerald-400 h-full rounded-full transition-all duration-500 ease-out shadow-md shadow-indigo-500/20"
+                    style={{ width: `${progress}%` }}
                   />
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: 16, flexShrink: 0 }}>
-                <span style={{ color: '#64748b', fontSize: 12 }}>
-                  Total: <strong style={{ color: '#94a3b8' }}>{totalTasks}</strong>
+              <div className="flex gap-4 flex-shrink-0 text-xs font-bold uppercase tracking-wider border-l border-white/5 pl-6">
+                <span className="text-slate-500">
+                  Total Payload: <strong className="text-slate-300 font-mono font-bold ml-1">{totalTasks}</strong>
                 </span>
-                <span style={{ color: '#64748b', fontSize: 12 }}>
-                  Done: <strong style={{ color: '#10b981' }}>{doneTasks}</strong>
+                <span className="text-slate-500">
+                  Committed: <strong className="text-emerald-400 font-mono font-bold ml-1">{doneTasks}</strong>
                 </span>
               </div>
             </div>
           )}
 
+          {/* Fallback Empty Context State */}
           {projects.length === 0 && (
-            <div style={{ textAlign: 'center', padding: '60px', color: '#334155' }}>
-              <div style={{ fontSize: 48, opacity: 0.2, marginBottom: 12 }}>📋</div>
-              <p>Pehle project banao!</p>
+            <div className="text-center py-24 bg-[#0b1324]/40 border border-white/[0.04] rounded-3xl shadow-xl shadow-black/20">
+              <div className="text-5xl opacity-15 mb-4 animate-pulse">📋</div>
+              <h3 className="text-base font-bold text-slate-400">No Target Framework Configured</h3>
+              <p className="text-slate-600 text-xs font-semibold mt-1">Please build or register a structural project cluster pipeline first.</p>
               <button
                 type="button"
                 onClick={() => navigate('/student/projects')}
-                style={{
-                  marginTop: 16,
-                  background: 'linear-gradient(135deg,#6366f1,#818cf8)',
-                  border: 'none',
-                  borderRadius: 10,
-                  padding: '10px 24px',
-                  color: 'white',
-                  cursor: 'pointer',
-                  fontWeight: 600,
-                }}
+                className="mt-6 bg-gradient-to-r from-indigo-500 to-purple-500 font-bold text-xs uppercase tracking-wider text-white px-6 py-3 rounded-xl hover:opacity-95 transition-all shadow-md shadow-indigo-500/20 active:scale-95"
               >
-                Create Project →
+                Launch Project Engine →
               </button>
             </div>
           )}
 
+          {/* Grid Layout Kanban Pipeline Matrix */}
           {projects.length > 0 && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14 }}>
+            <div className="grid grid-cols-4 gap-4 items-start">
               {COLUMNS.map((col) => (
                 <div
                   key={col.id}
                   onDragOver={onDragOver}
                   onDrop={() => onDrop(col.id)}
-                  style={{
-                    background: 'rgba(15,23,42,0.9)',
-                    border: '1px solid rgba(255,255,255,0.06)',
-                    borderRadius: 18,
-                    padding: '16px 14px',
-                    minHeight: 400,
-                  }}
+                  className={`bg-[#0b1324]/40 border border-white/[0.04] rounded-2xl p-4 min-h-[450px] flex flex-col transition-all group duration-300 ${col.border}`}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                  {/* Grid Column Header Information Node */}
+                  <div className="flex justify-between items-center mb-4 pb-2 border-b border-white/[0.02]">
                     <div>
-                      <div style={{ color: '#f1f5f9', fontWeight: 700, fontSize: 14 }}>{col.title}</div>
-                      <div style={{ color: '#475569', fontSize: 11, marginTop: 2 }}>{tasks[col.id].length} tasks</div>
+                      <div className="text-white font-bold text-sm tracking-tight">{col.title}</div>
+                      <div className="text-slate-500 text-[10px] font-bold uppercase tracking-wider mt-0.5">{tasks[col.id].length} Nodes Allocated</div>
                     </div>
-                    <div
-                      style={{
-                        width: 24,
-                        height: 24,
-                        background: col.bg,
-                        border: `1px solid ${col.color}30`,
-                        borderRadius: 8,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: col.color,
-                        fontWeight: 800,
-                        fontSize: 12,
-                      }}
-                    >
+                    <div className={`w-6 h-6 border rounded-lg flex items-center justify-center font-mono text-xs font-bold ${col.text} ${col.badge}`}>
                       {tasks[col.id].length}
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 }}>
+                  {/* Operational Kanban Segment Cards Stack */}
+                  <div className="flex flex-col gap-2.5 mb-4 flex-1 overflow-y-auto max-h-[500px] scrollbar-none">
                     {tasks[col.id].map((task) => {
                       const pr = PRIORITIES.find((p) => p.value === task.priority) || PRIORITIES[1]
                       return (
                         <div
                           key={task._id || task.id}
-                          className="task-card"
                           draggable
                           onDragStart={() => onDragStart(task, col.id)}
-                          style={{
-                            background: 'rgba(255,255,255,0.04)',
-                            border: '1px solid rgba(255,255,255,0.06)',
-                            borderRadius: 12,
-                            padding: '12px 14px',
-                          }}
+                          className="task-card bg-[#0e172a]/80 hover:bg-[#111c34]/90 border border-white/[0.05] hover:border-indigo-500/20 rounded-xl p-3.5 transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5 active:cursor-grabbing group/card"
                         >
-                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                            <p style={{ color: '#e2e8f0', fontSize: 13, margin: 0, flex: 1 }}>{task.title}</p>
+                          <div className="flex justify-between items-start gap-2 mb-2.5">
+                            <p className="text-slate-300 font-medium text-sm leading-snug break-words flex-1">{task.title}</p>
                             <button
                               type="button"
                               onClick={() => deleteTask(task._id || task.id)}
-                              style={{ background: 'none', border: 'none', color: '#334155', cursor: 'pointer', fontSize: 14 }}
+                              className="text-slate-600 hover:text-red-400 font-bold text-base leading-none transition-colors px-1"
+                              title="Drop Task Vector"
                             >
                               ×
                             </button>
                           </div>
-                          <span
-                            style={{
-                              background: `${pr.color}20`,
-                              color: pr.color,
-                              padding: '2px 8px',
-                              borderRadius: 20,
-                              fontSize: 11,
-                              fontWeight: 600,
-                            }}
-                          >
+                          <span className={`px-2 py-0.5 border rounded-full text-[9px] font-extrabold uppercase tracking-wide inline-block ${pr.theme}`}>
                             {pr.label}
                           </span>
                         </div>
@@ -294,50 +233,40 @@ export default function KanbanBoard() {
                     })}
                   </div>
 
+                  {/* Nested Inline Task Builder Form Block */}
                   {showAdd === col.id ? (
-                    <div style={{ background: 'rgba(99,102,241,0.05)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 12, padding: 12 }}>
+                    <div className="bg-[#070b14]/90 border border-indigo-500/20 rounded-xl p-3 animate-fadeUp shadow-inner">
                       <input
                         value={newTask.title}
                         onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
                         onKeyDown={(e) => e.key === 'Enter' && addTask(col.id)}
-                        placeholder="Task title..."
+                        placeholder="Configure task segment token..."
                         autoFocus
-                        style={{
-                          background: 'rgba(255,255,255,0.05)',
-                          border: '1px solid rgba(255,255,255,0.08)',
-                          borderRadius: 8,
-                          padding: '8px 10px',
-                          color: '#f1f5f9',
-                          fontSize: 13,
-                          width: '100%',
-                          outline: 'none',
-                          marginBottom: 8,
-                        }}
+                        className="w-full bg-white/[0.02] border border-white/5 focus:border-indigo-500/20 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-600 outline-none transition-all mb-2.5 font-medium"
                       />
-                      <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
+                      <div className="flex gap-1.5 mb-2.5">
                         {PRIORITIES.map((p) => (
                           <button
                             key={p.value}
                             type="button"
                             onClick={() => setNewTask({ ...newTask, priority: p.value })}
-                            style={{
-                              flex: 1,
-                              background: newTask.priority === p.value ? `${p.color}20` : 'transparent',
-                              border: `1px solid ${newTask.priority === p.value ? p.color : 'rgba(255,255,255,0.08)'}`,
-                              borderRadius: 8,
-                              padding: 4,
-                              color: newTask.priority === p.value ? p.color : '#475569',
-                              cursor: 'pointer',
-                              fontSize: 11,
-                            }}
+                            className={`flex-1 py-1 border rounded-md text-[9px] font-bold uppercase tracking-wider transition-all ${
+                              newTask.priority === p.value
+                                ? p.theme
+                                : 'bg-transparent border-white/5 text-slate-500 hover:text-slate-400'
+                            }`}
                           >
                             {p.label}
                           </button>
                         ))}
                       </div>
-                      <div style={{ display: 'flex', gap: 6 }}>
-                        <button type="button" onClick={() => addTask(col.id)} style={{ flex: 1, padding: 7, borderRadius: 8, border: `1px solid ${col.color}40`, background: col.bg, color: col.color, cursor: 'pointer' }}>
-                          Add
+                      <div className="flex gap-2">
+                        <button 
+                          type="button" 
+                          onClick={() => addTask(col.id)} 
+                          className="flex-1 py-1.5 rounded-lg border border-indigo-500/20 hover:border-indigo-500/30 text-indigo-400 text-xs font-bold transition-all bg-indigo-500/5 hover:bg-indigo-500/10"
+                        >
+                          Save Log
                         </button>
                         <button
                           type="button"
@@ -345,7 +274,7 @@ export default function KanbanBoard() {
                             setShowAdd(null)
                             setNewTask({ title: '', priority: 'medium', assignee: '' })
                           }}
-                          style={{ flex: 1, padding: 7, borderRadius: 8, border: '1px solid rgba(255,255,255,0.06)', background: 'transparent', color: '#475569', cursor: 'pointer' }}
+                          className="flex-1 py-1.5 rounded-lg border border-white/5 text-slate-500 hover:text-slate-400 text-xs font-bold transition-all bg-transparent hover:bg-white/5"
                         >
                           Cancel
                         </button>
@@ -355,18 +284,9 @@ export default function KanbanBoard() {
                     <button
                       type="button"
                       onClick={() => setShowAdd(col.id)}
-                      style={{
-                        width: '100%',
-                        background: 'transparent',
-                        border: '1px dashed rgba(255,255,255,0.08)',
-                        borderRadius: 10,
-                        padding: 8,
-                        color: '#334155',
-                        cursor: 'pointer',
-                        fontSize: 13,
-                      }}
+                      className="w-full bg-white/[0.01] hover:bg-white/[0.03] border border-dashed border-white/5 hover:border-white/10 text-slate-600 hover:text-slate-400 text-xs font-bold uppercase tracking-wider py-2.5 rounded-xl transition-all duration-200 mt-auto"
                     >
-                      + Add Task
+                      + Allocate Node Vector
                     </button>
                   )}
                 </div>

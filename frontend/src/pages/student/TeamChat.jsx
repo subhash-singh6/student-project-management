@@ -28,32 +28,35 @@ export default function TeamChat() {
   useEffect(() => {
     if (!socket || !team) return
 
-    // Team room join karo
+    // Join team workspace room
     socket.emit('join-room', team._id)
 
-    // Messages receive karo
+    // Receive message stream listeners
     socket.on('receive-message', (msg) => {
       setMessages(prev => [...prev, msg])
     })
 
-    // Typing indicator
+    // Typing indicators broadcast
     socket.on('user-typing', ({ name, userId }) => {
       if (userId !== user._id) {
         setTyping(name)
-        setTimeout(() => setTyping(null), 2000)
+        // Clear indicator automatically after 2 seconds
+        if (typingTimer.current) clearTimeout(typingTimer.current)
+        typingTimer.current = setTimeout(() => setTyping(null), 2000)
       }
     })
 
     return () => {
       socket.off('receive-message')
       socket.off('user-typing')
+      if (typingTimer.current) clearTimeout(typingTimer.current)
     }
   }, [socket, team])
 
   useEffect(() => {
-    // Auto scroll to bottom
+    // Smooth scrolling anchor sequence
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+  }, [messages, typing])
 
   const fetchTeam = async () => {
     try {
@@ -85,7 +88,7 @@ export default function TeamChat() {
     if (!input.trim() || !socket || !team) return
 
     const msg = {
-      id:        Date.now(),
+      id:      Date.now(),
       text:      input.trim(),
       senderId:  user._id,
       senderName: user.name,
@@ -93,159 +96,240 @@ export default function TeamChat() {
       roomId:    team._id,
     }
 
-    // Emit to socket
+    // Emit live to WebSocket Node
     socket.emit('send-message', msg)
 
-    // Local mein add karo
+    // Mount structural sequence locally
     setMessages((prev) => [...prev, msg])
-
     setInput('')
   }
 
   const handleTyping = () => {
     if (!socket || !team) return
     socket.emit('typing', { roomId: team._id, name: user.name, userId: user._id })
-    clearTimeout(typingTimer.current)
-    typingTimer.current = setTimeout(() => {}, 1500)
   }
 
   const formatTime = (iso) => {
     return new Date(iso).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
   }
 
-  const MEMBER_COLORS = ['#6366f1', '#22d3ee', '#10b981', '#f59e0b', '#ec4899']
+  const MEMBER_COLORS = ['#22d3ee', '#34d399', '#60a5fa', '#a78bfa', '#f43f5e']
   const getMemberColor = (name) => {
     const idx = name?.charCodeAt(0) % MEMBER_COLORS.length
     return MEMBER_COLORS[idx || 0]
   }
 
   if (loading) return (
-    <div style={{ minHeight:'100vh',background:'#070b14',display:'flex',alignItems:'center',justifyContent:'center' }}>
-      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-      <div style={{ width:40,height:40,border:'3px solid rgba(34,211,238,0.2)',borderTop:'3px solid #22d3ee',borderRadius:'50%',animation:'spin 1s linear infinite' }} />
+    <div className="min-h-screen bg-[#070b14] flex flex-col items-center justify-center gap-5">
+      <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
+      <div className="w-14 h-14 border-4 border-teal-500/20 border-t-teal-400 rounded-full" style={{ animation: 'spin 1s linear infinite' }} />
+      <p className="text-sm font-semibold tracking-widest text-[#94a3b8] animate-pulse">Establishing Workspace Streams...</p>
     </div>
   )
 
   if (!team) return (
-    <div style={{ minHeight:'100vh',background:'#070b14',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:16 }}>
-      <div style={{ fontSize:48,opacity:0.2 }}>💬</div>
-      <p style={{ color:'#475569',fontFamily:'sans-serif' }}>Pehle team join karo!</p>
-      <button onClick={()=>navigate('/student/team')} style={{ background:'linear-gradient(135deg,#6366f1,#818cf8)',border:'none',borderRadius:10,padding:'10px 24px',color:'white',cursor:'pointer',fontFamily:'sans-serif',fontWeight:600 }}>My Team →</button>
+    <div className="min-h-screen bg-[#070b14] flex flex-col items-center justify-center gap-6 text-center px-4">
+      <div className="text-6xl opacity-20 animate-bounce">💬</div>
+      <div>
+        <h2 className="text-xl font-extrabold text-white tracking-tight">No Active Workspace Found</h2>
+        <p className="text-xs text-[#475569] font-bold mt-1.5 max-w-xs leading-relaxed">
+          Please initialize or join a team squad inside your launchpad before accessing the group server module.
+        </p>
+      </div>
+      <button 
+        onClick={() => navigate('/student/team')} 
+        className="px-6 py-3 text-xs font-black tracking-widest uppercase text-[#070b14] bg-gradient-to-r from-teal-400 to-cyan-500 rounded-xl hover:opacity-90 shadow-lg shadow-teal-500/20 transition-all active:scale-95"
+      >
+        Access My Team Roster
+      </button>
     </div>
   )
 
   return (
-    <div style={{ height:'100vh',background:'#070b14',fontFamily:"'DM Sans',sans-serif",display:'flex',flexDirection:'column' }}>
+    <div className="h-screen bg-[#070b14] text-[#f8fafc] font-sans flex flex-col relative overflow-hidden">
+      
+      {/* ── Injection Styles ──────────────────────────────── */}
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap');
-        @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
-        ::-webkit-scrollbar{width:4px}
-        ::-webkit-scrollbar-track{background:transparent}
-        ::-webkit-scrollbar-thumb{background:rgba(99,102,241,0.3);border-radius:2px}
+        @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes wave { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+        
+        .anim-fade-up { animation: fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+        .typing-dot { animation: wave 1.2s ease-in-out infinite; }
+        
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(20, 184, 166, 0.15); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(20, 184, 166, 0.3); }
       `}</style>
 
-      {/* Header */}
-      <div style={{ background:'rgba(15,23,42,0.95)',borderBottom:'1px solid rgba(255,255,255,0.06)',padding:'14px 20px',display:'flex',alignItems:'center',justifyContent:'space-between',flexShrink:0 }}>
-        <div style={{ display:'flex',alignItems:'center',gap:12 }}>
-          <button onClick={()=>navigate('/student/dashboard')} style={{ background:'none',border:'none',color:'#475569',cursor:'pointer',fontSize:18,padding:0 }}>←</button>
-          <div style={{ width:38,height:38,background:'linear-gradient(135deg,#6366f1,#22d3ee)',borderRadius:12,display:'flex',alignItems:'center',justifyContent:'center',fontSize:18 }}>💬</div>
-          <div>
-            <div style={{ fontFamily:'Syne,sans-serif',color:'#f1f5f9',fontWeight:700,fontSize:15 }}>{team.name}</div>
-            <div style={{ color:'#475569',fontSize:11 }}>{team.members?.length} members</div>
+      {/* ── Background Blurred Aura Nodes ──────────────────── */}
+      <div aria-hidden className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] rounded-full bg-gradient-to-br from-teal-500/5 to-transparent blur-[80px]" />
+        <div className="absolute bottom-0 left-0 w-[450px] h-[450px] rounded-full bg-gradient-to-tr from-cyan-500/5 to-transparent blur-[90px]" />
+      </div>
+
+      {/* ── HEADER NAVIGATION PANEL ──────────────────────── */}
+      <header className="bg-[#0b1324]/80 backdrop-blur-xl border-b border-white/[0.04] px-5 py-4 flex items-center justify-between flex-shrink-0 relative z-10">
+        <div className="flex items-center gap-4 min-w-0">
+          <button 
+            onClick={() => navigate('/student/dashboard')} 
+            className="w-9 h-9 bg-white/[0.02] border border-white/5 hover:border-white/10 text-slate-400 hover:text-white rounded-xl flex items-center justify-center text-sm transition-all active:scale-95"
+            title="Return to Hub"
+          >
+            ←
+          </button>
+          
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-400 via-cyan-500 to-blue-500 flex items-center justify-center text-lg shadow-md shadow-teal-500/10">
+            💬
+          </div>
+          
+          <div className="overflow-hidden">
+            <h1 className="font-display font-extrabold text-sm sm:text-base text-white tracking-tight truncate">{team.name}</h1>
+            <p className="text-[10px] font-bold text-teal-400 tracking-wider uppercase mt-0.5">{team.members?.length || 0} Synced Nodes</p>
           </div>
         </div>
 
-        {/* Online members */}
-        <div style={{ display:'flex',alignItems:'center',gap:6 }}>
-          {team.members?.slice(0,4).map((m,i)=>(
-            <div key={i} title={m.user?.name} style={{ width:28,height:28,borderRadius:'50%',background:`linear-gradient(135deg,${getMemberColor(m.user?.name)},${getMemberColor(m.user?.name)}88)`,display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:11,fontWeight:700,marginLeft:i>0?-8:0,border:'2px solid #070b14' }}>
-              {m.user?.name?.charAt(0).toUpperCase()}
-            </div>
-          ))}
-          {team.members?.length > 4 && <span style={{ color:'#475569',fontSize:12 }}>+{team.members.length-4}</span>}
+        {/* Sync Status Rosters Overlap */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center -space-x-2.5 hidden sm:flex">
+            {team.members?.slice(0, 4).map((m, i) => {
+              const name = m.user?.name || 'User'
+              const color = getMemberColor(name)
+              return (
+                <div 
+                  key={i} 
+                  title={name} 
+                  className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-black border-2 border-[#070b14] shadow-md transition-transform hover:-translate-y-0.5 cursor-pointer"
+                  style={{ background: `linear-gradient(135deg, ${color}, ${color}dd)` }}
+                >
+                  {name.charAt(0).toUpperCase()}
+                </div>
+              )
+            })}
+          </div>
+          {team.members?.length > 4 && (
+            <span className="text-[10px] font-extrabold bg-white/[0.03] border border-white/5 px-2 py-1 rounded-md text-[#475569] font-mono">
+              +{team.members.length - 4}
+            </span>
+          )}
         </div>
-      </div>
+      </header>
 
-      {/* Messages Area */}
-      <div style={{ flex:1,overflowY:'auto',padding:'20px',display:'flex',flexDirection:'column',gap:12 }}>
-
-        {/* Welcome message */}
+      {/* ── MAIN STREAM CHAT STREAM SPACE ────────────────── */}
+      <main className="flex-1 overflow-y-auto px-5 py-6 flex flex-col gap-5 relative z-10">
+        
+        {/* Dynamic Static Dashboard Empty Array Indicator */}
         {messages.length === 0 && (
-          <div style={{ textAlign:'center',margin:'auto',color:'#334155' }}>
-            <div style={{ fontSize:48,marginBottom:12,opacity:0.3 }}>💬</div>
-            <p style={{ fontSize:14 }}>Chat shuru karo! Team ke saath baat karo.</p>
+          <div className="text-center my-auto flex flex-col items-center justify-center gap-3">
+            <div className="text-5xl opacity-20 animate-pulse">📡</div>
+            <div className="max-w-xs">
+              <h3 className="text-xs font-extrabold text-slate-400 uppercase tracking-widest">Secure Broadcast Channel</h3>
+              <p className="text-[11px] text-[#475569] font-semibold leading-relaxed mt-1">
+                Zero log artifacts streaming in terminal. Enter a transmission query below to message teammates.
+              </p>
+            </div>
           </div>
         )}
 
+        {/* Messages Compilation Engine */}
         {messages.map((msg, i) => {
           const isMe = msg.senderId === user._id
           const color = getMemberColor(msg.senderName)
-          const showAvatar = i === 0 || messages[i-1]?.senderId !== msg.senderId
+          // Evaluate avatar stacking logic parameters
+          const showAvatar = i === 0 || messages[i - 1]?.senderId !== msg.senderId
 
           return (
-            <div key={msg.id||i} style={{ display:'flex',justifyContent:isMe?'flex-end':'flex-start',gap:8,animation:'fadeIn 0.3s ease' }}>
-              {!isMe && showAvatar && (
-                <div style={{ width:32,height:32,borderRadius:'50%',background:`linear-gradient(135deg,${color},${color}88)`,display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:13,fontWeight:700,flexShrink:0,alignSelf:'flex-end' }}>
-                  {msg.senderName?.charAt(0).toUpperCase()}
-                </div>
-              )}
-              {!isMe && !showAvatar && <div style={{ width:32,flexShrink:0 }} />}
+            <div 
+              key={msg.id || i} 
+              className={`anim-fade-up flex items-end gap-3 max-w-full sm:max-w-3xl ${isMe ? 'self-end flex-row-reverse' : 'self-start'}`}
+            >
+              {/* Node Avatar Construct */}
+              {!isMe ? (
+                showAvatar ? (
+                  <div 
+                    title={msg.senderName}
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-black flex-shrink-0 shadow-md border border-white/5"
+                    style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)` }}
+                  >
+                    {msg.senderName?.charAt(0).toUpperCase()}
+                  </div>
+                ) : (
+                  <div className="w-8 flex-shrink-0" />
+                )
+              ) : null}
 
-              <div style={{ maxWidth:'70%' }}>
+              {/* Message Payload Package Bubble */}
+              <div className="flex flex-col max-w-[82%] sm:max-w-md">
                 {showAvatar && !isMe && (
-                  <div style={{ color,fontSize:12,fontWeight:600,marginBottom:4,paddingLeft:4 }}>{msg.senderName}</div>
+                  <span 
+                    className="text-[11px] font-bold tracking-tight mb-1 ml-1"
+                    style={{ color: color }}
+                  >
+                    {msg.senderName}
+                  </span>
                 )}
-                <div style={{
-                  background: isMe ? 'linear-gradient(135deg,#6366f1,#818cf8)' : 'rgba(255,255,255,0.06)',
-                  borderRadius: isMe ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-                  padding: '10px 14px',
-                  color: '#f1f5f9',
-                  fontSize: 14,
-                  lineHeight: 1.5,
-                  wordBreak: 'break-word',
-                  boxShadow: isMe ? '0 4px 12px rgba(99,102,241,0.3)' : 'none',
-                }}>
+                
+                <div 
+                  className={`px-4 py-3 text-sm font-medium tracking-normal leading-relaxed break-words border ${
+                    isMe 
+                      ? 'bg-gradient-to-br from-teal-500 to-cyan-500 text-[#070b14] border-teal-400/20 rounded-[18px] rounded-br-[4px] font-semibold shadow-md shadow-teal-500/5' 
+                      : 'bg-[#0f172a]/90 text-slate-200 border-white/[0.04] rounded-[18px] rounded-bl-[4px]'
+                  }`}
+                >
                   {msg.text}
                 </div>
-                <div style={{ color:'#334155',fontSize:10,marginTop:4,textAlign:isMe?'right':'left',paddingLeft:4 }}>
+                
+                <span className={`text-[9px] font-bold text-[#475569] mt-1 tracking-wider px-1 ${isMe ? 'text-right' : 'text-left'}`}>
                   {formatTime(msg.time)}
-                </div>
+                </span>
               </div>
             </div>
           )
         })}
 
-        {/* Typing indicator */}
+        {/* Dynamic Fluid Typing Nodes Component */}
         {typing && (
-          <div style={{ display:'flex',alignItems:'center',gap:8,animation:'fadeIn 0.3s ease' }}>
-            <div style={{ color:'#475569',fontSize:13 }}>{typing} typing</div>
-            <div style={{ display:'flex',gap:3 }}>
-              {[0,1,2].map(i=>(
-                <div key={i} style={{ width:5,height:5,borderRadius:'50%',background:'#475569',animation:`pulse 1s ease ${i*0.2}s infinite` }} />
+          <div className="anim-fade-up flex items-center gap-3 self-start pl-11">
+            <span className="text-[11px] font-bold tracking-wide text-teal-400/80 uppercase">{typing} logging input</span>
+            <div className="flex items-center gap-1.5 h-3">
+              {[0, 1, 2].map((i) => (
+                <div 
+                  key={i} 
+                  className="typing-dot w-1.5 h-1.5 rounded-full bg-teal-500/60"
+                  style={{ animationDelay: `${i * 0.2}s` }}
+                />
               ))}
             </div>
           </div>
         )}
 
         <div ref={bottomRef} />
-      </div>
+      </main>
 
-      {/* Input Area */}
-      <div style={{ background:'rgba(15,23,42,0.95)',borderTop:'1px solid rgba(255,255,255,0.06)',padding:'16px 20px',flexShrink:0 }}>
-        <form onSubmit={sendMessage} style={{ display:'flex',gap:10,alignItems:'center' }}>
+      {/* ── TERMINAL FOOTER CONTROLS ─────────────────────── */}
+      <footer className="bg-[#0b1324]/90 backdrop-blur-xl border-t border-white/[0.04] p-4 sm:p-5 flex-shrink-0 relative z-10">
+        <form onSubmit={sendMessage} className="flex items-center gap-3 max-w-7xl mx-auto">
           <input
+            type="text"
             value={input}
-            onChange={e=>setInput(e.target.value)}
-            onKeyPress={handleTyping}
-            placeholder="Message type karo..."
-            style={{ flex:1,background:'rgba(255,255,255,0.05)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:14,padding:'12px 16px',color:'#f1f5f9',fontSize:14,outline:'none',fontFamily:'DM Sans,sans-serif' }}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleTyping}
+            placeholder="Type your secure terminal transmission message..."
+            className="flex-1 bg-white/[0.03] border border-white/5 focus:border-teal-500/30 rounded-xl px-4 py-3.5 text-sm text-slate-200 placeholder-[#475569] font-medium outline-none transition-all focus:shadow-xl focus:shadow-black/20"
           />
-          <button type="submit" disabled={!input.trim()} style={{ width:44,height:44,background:input.trim()?'linear-gradient(135deg,#6366f1,#818cf8)':'rgba(255,255,255,0.04)',border:'none',borderRadius:12,color:'white',cursor:input.trim()?'pointer':'not-allowed',fontSize:20,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,transition:'all 0.2s' }}>
+          <button 
+            type="submit" 
+            disabled={!input.trim()} 
+            className={`w-12 h-12 rounded-xl text-lg font-black flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
+              input.trim() 
+                ? 'bg-gradient-to-br from-teal-400 to-cyan-500 text-[#070b14] cursor-pointer shadow-lg shadow-teal-400/10 active:scale-95' 
+                : 'bg-white/[0.02] border border-white/5 text-[#475569] cursor-not-allowed'
+            }`}
+          >
             ↑
           </button>
         </form>
-      </div>
+      </footer>
     </div>
   )
 }
