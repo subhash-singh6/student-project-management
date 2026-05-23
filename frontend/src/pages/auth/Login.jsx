@@ -41,61 +41,20 @@ export default function Login() {
 
   return (
     <div className="auth-bg min-h-screen flex items-center justify-center px-4">
-      <div className="glass-card w-full max-w-md p-8 relative z-10 ">
-        {/* Logo */}
-        <div
-          className="text-center mb-8 fade-in "
-          style={{ paddingTop: "20px" }}
-        >
-          <div
-            style={{
-              width: 56,
-              height: 56,
-              background: "linear-gradient(135deg,#6366f1,#22d3ee)",
-              borderRadius: 16,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              margin: "0 auto 16px",
-              fontSize: 24,
-            }}
-          >
+      <div className="glass-card relative z-10 w-full max-w-md p-8">
+        <div className="fade-in mb-8 pt-5 text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-cyan-400 text-2xl">
             🎓
           </div>
-          <h1 style={{ fontSize: 28, fontWeight: 700, color: "#f1f5f9" }}>
-            Welcome Back
-          </h1>
-          <p
-            style={{
-              color: "#94a3b8",
-              fontSize: 14,
-              marginTop: 6,
-              marginBottom: 15,
-            }}
-          >
+          <h1 className="text-3xl font-bold text-slate-100">Welcome Back</h1>
+          <p className="mt-2 mb-4 text-sm text-slate-400">
             SPMS — Student Project Management System
           </p>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 16,
-            padding: "20px",
-          }}
-        >
-          {/* Email */}
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-5">
           <div className="fade-in-2">
-            <label
-              style={{
-                fontSize: 13,
-                color: "#94a3b8",
-                marginBottom: 6,
-                display: "block",
-              }}
-            >
+            <label className="mb-2 block text-sm text-slate-400">
               Email Address
             </label>
             <input
@@ -108,16 +67,8 @@ export default function Login() {
             />
           </div>
 
-          {/* Password */}
-          <div className="fade-in-3" style={{ position: "relative" }}>
-            <label
-              style={{
-                fontSize: 13,
-                color: "#94a3b8",
-                marginBottom: 6,
-                display: "block",
-              }}
-            >
+          <div className="fade-in-3 relative">
+            <label className="mb-2 block text-sm text-slate-400">
               Password
             </label>
             <input
@@ -126,47 +77,31 @@ export default function Login() {
               placeholder="password"
               value={form.password}
               onChange={handleChange}
-              className="custom-input"
-              style={{ paddingRight: 48 }}
+              className="custom-input pr-12"
             />
             <button
               type="button"
               onClick={() => setShowPass(!showPass)}
-              style={{
-                position: "absolute",
-                right: 14,
-                top: 38,
-                background: "none",
-                border: "none",
-                color: "#94a3b8",
-                cursor: "pointer",
-                fontSize: 16,
-              }}
+              className="absolute right-3 top-9 text-base text-slate-400"
             >
               {showPass ? "🙈" : "👁️"}
             </button>
           </div>
 
-          {/* Submit */}
-          <div className="fade-in-4" style={{ marginTop: 8 }}>
+          <div className="fade-in-4 mt-2">
             <button type="submit" className="btn-primary" disabled={loading}>
               {loading ? "Logging in..." : "Login →"}
             </button>
           </div>
         </form>
 
-        <div style={{ textAlign: "center", marginTop: 24, marginBottom: 20 }}>
-          <span style={{ color: "#94a3b8", fontSize: 14 }}>
+        <div className="mt-6 mb-5 text-center">
+          <span className="text-sm text-slate-400">
             Don't have an account?{" "}
           </span>
           <Link
             to="/register"
-            style={{
-              color: "#818cf8",
-              fontSize: 14,
-              fontWeight: 600,
-              textDecoration: "none",
-            }}
+            className="text-sm font-semibold text-indigo-400 no-underline"
           >
             Sign up
           </Link>

@@ -4,9 +4,9 @@ import { useAuth } from "../../context/AuthContext";
 import toast from "react-hot-toast";
 
 const roles = [
-  { value: "student", label: "Student", icon: "🎓" },
-  { value: "mentor", label: "Mentor", icon: "🧑‍💼" },
-  { value: "teacher", label: "Teacher", icon: "👨‍🏫" },
+  { value: "student", label: "Student", icon: "🎓", desc: "For learners" },
+  { value: "mentor", label: "Mentor", icon: "🧑‍💼", desc: "For guides" },
+  { value: "teacher", label: "Teacher", icon: "👨‍🏫", desc: "For faculty" },
 ];
 
 export default function Register() {
@@ -55,6 +55,7 @@ export default function Register() {
           branch: form.branch,
         };
       }
+
       if (role === "mentor") {
         if (!form.expertise || !form.organization)
           return toast.error("Expertise and organization are required!");
@@ -64,6 +65,7 @@ export default function Register() {
           organization: form.organization,
         };
       }
+
       if (role === "teacher") {
         if (!form.employeeId || !form.department)
           return toast.error("Employee ID and department are required!");
@@ -90,63 +92,21 @@ export default function Register() {
 
   return (
     <div className="auth-bg min-h-screen flex items-center justify-center px-4 py-10">
-      <div className="glass-card w-full max-w-lg 1-8 relative z-10">
-        {/* Title */}
-        <div
-          className="text-center mb-6 fade-in "
-          style={{ paddingTop: "20px" }}
-        >
-          <div
-            style={{
-              width: 56,
-              height: 56,
-              background: "linear-gradient(135deg,#6366f1,#22d3ee)",
-              borderRadius: 16,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              margin: "0 auto 16px",
-              fontSize: 24,
-              margin: "20px auto 16px",
-            }}
-          >
+      <div className="glass-card relative z-10 w-full max-w-lg p-8">
+        <div className="fade-in mb-6 pt-5 text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-cyan-400 text-2xl">
             ✨
           </div>
-          <h1
-            style={{
-              fontSize: 26,
-              fontWeight: 600,
-              color: "#f1f5f9",
-              marginBottom: "25px",
-            }}
-          >
+          <h1 className="mb-6 text-[26px] font-semibold text-slate-100">
             Create Account
           </h1>
-          {/* <p style={{ color:"#94a3b8", fontSize:14, marginTop:6 }}>SPMS mein join karo</p> */}
         </div>
 
-        {/* Role Selector */}
-        <div
-          className="fade-in-2"
-          style={{ marginBottom: 20, padding: "20px" }}
-        >
-          <label
-            style={{
-              fontSize: 13,
-              color: "#94a3b8",
-              marginBottom: 10,
-              display: "block",
-            }}
-          >
-           Who are you?
+        <div className="fade-in-2 mb-5 p-5">
+          <label className="mb-3 block text-sm text-slate-400">
+            Who are you?
           </label>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr 1fr",
-              gap: 10,
-            }}
-          >
+          <div className="grid grid-cols-3 gap-2">
             {roles.map((r) => (
               <button
                 key={r.value}
@@ -154,37 +114,17 @@ export default function Register() {
                 onClick={() => setRole(r.value)}
                 className={`role-btn ${role === r.value ? "active" : ""}`}
               >
-                <div style={{ fontSize: 22, marginBottom: 4 }}>{r.icon}</div>
-                <div style={{ fontWeight: 600, fontSize: 13 }}>{r.label}</div>
-                <div style={{ fontSize: 11, marginTop: 2, opacity: 0.7 }}>
-                  {r.desc}
-                </div>
+                <div className="mb-1 text-[22px]">{r.icon}</div>
+                <div className="text-sm font-semibold">{r.label}</div>
+                <div className="mt-1 text-[11px] opacity-70">{r.desc}</div>
               </button>
             ))}
           </div>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 14,
-            padding: "20px",
-          }}
-        >
-          {/* Common Fields */}
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-5">
           <div className="fade-in-2">
-            <label
-              style={{
-                fontSize: 13,
-                color: "#94a3b8",
-                marginBottom: 6,
-                display: "block",
-              }}
-            >
-              Full Name
-            </label>
+            <label className="mb-2 block text-sm text-slate-400">Full Name</label>
             <input
               name="name"
               placeholder="Enter your name"
@@ -193,17 +133,9 @@ export default function Register() {
               className="custom-input"
             />
           </div>
+
           <div className="fade-in-3">
-            <label
-              style={{
-                fontSize: 13,
-                color: "#94a3b8",
-                marginBottom: 6,
-                display: "block",
-              }}
-            >
-              Email
-            </label>
+            <label className="mb-2 block text-sm text-slate-400">Email</label>
             <input
               type="email"
               name="email"
@@ -213,17 +145,9 @@ export default function Register() {
               className="custom-input"
             />
           </div>
+
           <div className="fade-in-3">
-            <label
-              style={{
-                fontSize: 13,
-                color: "#94a3b8",
-                marginBottom: 6,
-                display: "block",
-              }}
-            >
-              Password
-            </label>
+            <label className="mb-2 block text-sm text-slate-400">Password</label>
             <input
               type="password"
               name="password"
@@ -234,33 +158,13 @@ export default function Register() {
             />
           </div>
 
-          <div
-            style={{
-              height: 1,
-              background: "rgba(255,255,255,0.06)",
-              margin: "2px 0",
-            }}
-          />
+          <div className="h-px bg-white/10" />
 
-          {/* Student Fields */}
           {role === "student" && (
             <>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: 12,
-                }}
-              >
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label
-                    style={{
-                      fontSize: 13,
-                      color: "#94a3b8",
-                      marginBottom: 6,
-                      display: "block",
-                    }}
-                  >
+                  <label className="mb-2 block text-sm text-slate-400">
                     Enrollment No.
                   </label>
                   <input
@@ -272,14 +176,7 @@ export default function Register() {
                   />
                 </div>
                 <div>
-                  <label
-                    style={{
-                      fontSize: 13,
-                      color: "#94a3b8",
-                      marginBottom: 6,
-                      display: "block",
-                    }}
-                  >
+                  <label className="mb-2 block text-sm text-slate-400">
                     Semester
                   </label>
                   <input
@@ -294,15 +191,9 @@ export default function Register() {
                   />
                 </div>
               </div>
+
               <div>
-                <label
-                  style={{
-                    fontSize: 13,
-                    color: "#94a3b8",
-                    marginBottom: 6,
-                    display: "block",
-                  }}
-                >
+                <label className="mb-2 block text-sm text-slate-400">
                   Branch
                 </label>
                 <select
@@ -322,20 +213,11 @@ export default function Register() {
             </>
           )}
 
-          {/* Mentor Fields */}
           {role === "mentor" && (
             <>
               <div>
-                <label
-                  style={{
-                    fontSize: 13,
-                    color: "#94a3b8",
-                    marginBottom: 6,
-                    display: "block",
-                  }}
-                >
-                  Expertise{" "}
-                  <span style={{ opacity: 0.6 }}>(comma separated)</span>
+                <label className="mb-2 block text-sm text-slate-400">
+                  Expertise <span className="opacity-60">(comma separated)</span>
                 </label>
                 <input
                   name="expertise"
@@ -346,14 +228,7 @@ export default function Register() {
                 />
               </div>
               <div>
-                <label
-                  style={{
-                    fontSize: 13,
-                    color: "#94a3b8",
-                    marginBottom: 6,
-                    display: "block",
-                  }}
-                >
+                <label className="mb-2 block text-sm text-slate-400">
                   Organization
                 </label>
                 <input
@@ -367,25 +242,11 @@ export default function Register() {
             </>
           )}
 
-          {/* Teacher Fields */}
           {role === "teacher" && (
             <>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: 12,
-                }}
-              >
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label
-                    style={{
-                      fontSize: 13,
-                      color: "#94a3b8",
-                      marginBottom: 6,
-                      display: "block",
-                    }}
-                  >
+                  <label className="mb-2 block text-sm text-slate-400">
                     Employee ID
                   </label>
                   <input
@@ -397,14 +258,7 @@ export default function Register() {
                   />
                 </div>
                 <div>
-                  <label
-                    style={{
-                      fontSize: 13,
-                      color: "#94a3b8",
-                      marginBottom: 6,
-                      display: "block",
-                    }}
-                  >
+                  <label className="mb-2 block text-sm text-slate-400">
                     Department
                   </label>
                   <select
@@ -422,17 +276,10 @@ export default function Register() {
                   </select>
                 </div>
               </div>
+
               <div>
-                <label
-                  style={{
-                    fontSize: 13,
-                    color: "#94a3b8",
-                    marginBottom: 6,
-                    display: "block",
-                  }}
-                >
-                  Subjects{" "}
-                  <span style={{ opacity: 0.6 }}>(comma se alag karo)</span>
+                <label className="mb-2 block text-sm text-slate-400">
+                  Subjects <span className="opacity-60">(comma se alag karo)</span>
                 </label>
                 <input
                   name="subjects"
@@ -445,29 +292,19 @@ export default function Register() {
             </>
           )}
 
-          <div style={{ marginTop: 8 }}>
+          <div className="mt-2">
             <button type="submit" className="btn-primary" disabled={loading}>
               {loading ? "Creating account..." : "Create Account →"}
             </button>
           </div>
         </form>
 
-        <div
-          style={{ textAlign: "center", marginTop: 20, marginBottom: "20px" }}
-        >
-          <span style={{ color: "#94a3b8", fontSize: 14 }}>
+        <div className="mt-5 mb-5 text-center">
+          <span className="text-sm text-slate-400">
             Already have an account?{" "}
           </span>
-          <Link
-            to="/login"
-            style={{
-              color: "#818cf8",
-              fontSize: 14,
-              fontWeight: 600,
-              textDecoration: "none",
-            }}
-          >
-            Login 
+          <Link to="/login" className="text-sm font-semibold text-indigo-400 no-underline">
+            Login
           </Link>
         </div>
       </div>
