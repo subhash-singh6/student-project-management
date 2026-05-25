@@ -32,13 +32,16 @@ const projectSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Team",
     },
-    mentor: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
+    // ✅ Mentor field completely removed
     teacher: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+    },
+    // ✅ College grading valid karne ke liye Subject schema link kar diya hai
+    subject: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Subject",
+      required: [true, "Project kis subject ka hai ye batana zaroori hai"],
     },
 
     // Progress

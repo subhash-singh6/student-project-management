@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../../context/AuthContext'
+import { useAuth } from '../../constants/context/AuthContext'
 import { adminService } from '../../services/adminService'
 import toast from 'react-hot-toast'
 

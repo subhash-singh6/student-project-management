@@ -31,4 +31,4 @@ router.get("/requests",            allowRoles("teacher"),  getMyRequests)
 router.get("/my-requests",         allowRoles("student"),  getStudentRequests)
 router.put("/requests/:id/respond", allowRoles("teacher"), respondToRequest)
 
-module.exports = router
+module.exports = router;

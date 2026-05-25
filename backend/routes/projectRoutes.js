@@ -12,7 +12,6 @@ const {
 const { protect }    = require("../middleware/authMiddleware");
 const { allowRoles } = require("../middleware/roleMiddleware");
 
-// Sab protected hain
 router.use(protect);
 
 router.route("/")
@@ -24,7 +23,8 @@ router.route("/:id")
   .put(updateProject)
   .delete(allowRoles("student"), deleteProject);
 
-router.put("/:id/approve", allowRoles("teacher", "mentor"), approveProject);
+// 🧠 Fix: Mentor hata kar 'admin' add kiya taaki higher authority bhi approve kar sake
+router.put("/:id/approve", allowRoles("teacher", "admin"), approveProject);
 router.put("/:id/grade",   allowRoles("teacher"),           gradeProject);
 
 module.exports = router;

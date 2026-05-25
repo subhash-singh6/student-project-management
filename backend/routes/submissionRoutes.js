@@ -15,6 +15,8 @@ router.use(protect);
 router.post("/", uploadSubmission.single("file"), allowRoles("student"), createSubmission);
 router.get("/my", allowRoles("student"), getMySubmissions);
 router.get("/project/:projectId", getProjectSubmissions);
-router.put("/:id/review", allowRoles("teacher", "mentor"), reviewSubmission);
+
+// 🧠 Fix: Mentor hata kar sirf 'teacher' rakha hai review ke liye
+router.put("/:id/review", allowRoles("teacher"), reviewSubmission);
 
 module.exports = router;

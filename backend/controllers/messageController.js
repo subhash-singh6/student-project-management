@@ -10,14 +10,16 @@ const getTeamMessages = async (req, res) => {
   try {
     const team = await Team.findById(req.params.teamId);
     if (!team) return res.status(404).json({ message: "Team not found." });
-    if (!isTeamMember(team, req.user._id)) {
-      return res.status(403).json({ message: "Team member nahi ho." });
+
+    const hasAccess = isTeamMember(team, req.user._id) || req.user.role === "teacher" || req.user.role === "admin";
+    if (!hasAccess) {
+      return res.status(403).json({ message: "Access denied. You are not authorized to access this team chat pipeline." });
     }
 
     const messages = await Message.find({ team: team._id })
       .sort({ createdAt: 1 })
       .limit(200)
-      .populate("sender", "name avatar");
+      .populate("sender", "name avatar role");
 
     res.status(200).json({ success: true, messages });
   } catch (error) {

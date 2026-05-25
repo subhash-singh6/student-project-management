@@ -13,7 +13,7 @@ const { allowRoles } = require("../middleware/roleMiddleware");
 router.use(protect);
 
 router.route("/")
-  .get(allowRoles("teacher", "mentor"), getAllTeams)
+  .get(allowRoles("teacher", "admin"), getAllTeams) // 🧠 Fix: Mentor removed, admin added
   .post(allowRoles("student"),          createTeam);
 
 router.get("/my", allowRoles("student"), getMyTeam);

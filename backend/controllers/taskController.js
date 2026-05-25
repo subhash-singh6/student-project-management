@@ -1,18 +1,23 @@
-const Task = require("../models/Task");
+const Task    = require("../models/Task");
 const Project = require("../models/Project");
 
 const canAccessProject = async (projectId, user) => {
   const project = await Project.findById(projectId);
   if (!project) return { ok: false, status: 404, message: "Project not found." };
 
-  if (user.role === "teacher") return { ok: true, project };
-  if (user.role === "mentor" && project.mentor?.toString() === user._id.toString()) {
-    return { ok: true, project };
-  }
+  if (user.role === "teacher" || user.role === "admin") return { ok: true, project };
   if (user.role === "student" && project.createdBy.toString() === user._id.toString()) {
     return { ok: true, project };
   }
-  return { ok: false, status: 403, message: "Access denied." };
+  
+  // ✅ Team member security bypass clearance
+  if (user.role === "student" && project.team) {
+    const Team = require("../models/Team");
+    const linkedTeam = await Team.findOne({ _id: project.team, "members.user": user._id });
+    if (linkedTeam) return { ok: true, project };
+  }
+
+  return { ok: false, status: 403, message: "Access denied. Action restricted." };
 };
 
 const getTasksByProject = async (req, res) => {
@@ -85,7 +90,7 @@ const deleteTask = async (req, res) => {
     if (!access.ok) return res.status(access.status).json({ message: access.message });
 
     await task.deleteOne();
-    res.status(200).json({ success: true, message: "Task deleted." });
+    res.status(200).json({ success: true, message: "Task successfully deleted." });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

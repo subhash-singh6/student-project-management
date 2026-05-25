@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../../context/AuthContext'
-import { useSocket } from '../../context/SocketContext'
+import { useAuth } from '../../constants/context/AuthContext'
+import { useSocket } from '../../constants/context/SocketContext'
 import API from '../../api/axios'
 import { messageService } from '../../services/messageService'
 

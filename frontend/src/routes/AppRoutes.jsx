@@ -2,37 +2,38 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import PrivateRoute from "./PrivateRoute";
 
 // Public
+import ForgotPassword from "../pages/auth/ForgotPassword";
 import Landing from "../pages/Landing";
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
 
 // Common
 import Profile from "../pages/Profile";
-import Analytics from "../pages/Analytics";
+// import Analytics from "../pages/Analytics";
 import Leaderboard from "../pages/Leaderboard";
 
 // Student
 import StudentDashboard from "../pages/student/StudentDashboard";
 import MyProjects from "../pages/student/MyProjects";
 import MyTeam from "../pages/student/MyTeam";
-import TeamChat from "../pages/student/TeamChat";
 import KanbanBoard from "../pages/student/KanbanBoard";
-import AssignTeacher from "../pages/student/AssignTeacher";
-import ProjectDetails from "../pages/student/ProjectDetails"; // ✅ Import clean kar diya hai
-
-// Mentor
-import MentorDashboard from "../pages/mentor/MentorDashboard";
-import AssignedStudents from "../pages/mentor/AssignedStudents";
-import ScheduleMeeting from "../pages/mentor/ScheduleMeeting";
+import EnrollSubject from "../pages/student/EnrollSubject";
+import ProjectDetails from "../pages/student/ProjectDetails";
 
 // Teacher
+// import AdminPanel from "../pages/teacher/AdminPanel";
 import TeacherDashboard from "../pages/teacher/TeacherDashboard";
 import AllProjects from "../pages/teacher/AllProjects";
 import GiveGrades from "../pages/teacher/GiveGrades";
 import SubjectManagement from "../pages/teacher/SubjectManagement";
+import AdminPanel from "../pages/teacher/AdminPanel"; // Teacher specific admin area
 
-// Admin
-import AdminPanel from "../pages/admin/AdminPanel";
+// Admin (System-wide)
+import Analytics from "../pages/admin/Analytics";
+import AdminDashboard from "../pages/admin/AdminDashboard";
+import ManageUsers from "../pages/admin/ManageUsers";
+import AllProjectsAdmin from "../pages/admin/AllProjectsAdmin";
+import SystemLogs from "../pages/admin/SystemLogs";
 
 export default function AppRoutes() {
   return (
@@ -40,11 +41,13 @@ export default function AppRoutes() {
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
 
+      {/* Common Protected Routes */}
       <Route
         path="/profile"
         element={
-          <PrivateRoute allowedRoles={["student", "mentor", "teacher"]}>
+          <PrivateRoute allowedRoles={["student", "teacher", "admin"]}>
             <Profile />
           </PrivateRoute>
         }
@@ -52,7 +55,7 @@ export default function AppRoutes() {
       <Route
         path="/analytics"
         element={
-          <PrivateRoute allowedRoles={["student", "mentor", "teacher"]}>
+          <PrivateRoute allowedRoles={["student", "teacher", "admin"]}>
             <Analytics />
           </PrivateRoute>
         }
@@ -60,13 +63,13 @@ export default function AppRoutes() {
       <Route
         path="/leaderboard"
         element={
-          <PrivateRoute allowedRoles={["student", "mentor", "teacher"]}>
+          <PrivateRoute allowedRoles={["student", "teacher", "admin"]}>
             <Leaderboard />
           </PrivateRoute>
         }
       />
 
-      {/* ── STUDENT ROUTES CONTROL BLOCK ── */}
+      {/* STUDENT ROUTES */}
       <Route
         path="/student/dashboard"
         element={
@@ -83,8 +86,6 @@ export default function AppRoutes() {
           </PrivateRoute>
         }
       />
-      
-      {/* 👇 YE NAYA DYNAMIC ROUTE ADD KAR DIYA HAI */}
       <Route
         path="/student/project/:id"
         element={
@@ -93,20 +94,11 @@ export default function AppRoutes() {
           </PrivateRoute>
         }
       />
-
       <Route
         path="/student/team"
         element={
           <PrivateRoute allowedRoles={["student"]}>
             <MyTeam />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/student/chat"
-        element={
-          <PrivateRoute allowedRoles={["student"]}>
-            <TeamChat />
           </PrivateRoute>
         }
       />
@@ -119,41 +111,15 @@ export default function AppRoutes() {
         }
       />
       <Route
-        path="/student/assign-teacher"
+        path="/student/enroll-subject"
         element={
           <PrivateRoute allowedRoles={["student"]}>
-            <AssignTeacher />
+            <EnrollSubject />
           </PrivateRoute>
         }
       />
 
-      {/* ── MENTOR ROUTES CONTROL BLOCK ── */}
-      <Route
-        path="/mentor/dashboard"
-        element={
-          <PrivateRoute allowedRoles={["mentor"]}>
-            <MentorDashboard />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/mentor/students"
-        element={
-          <PrivateRoute allowedRoles={["mentor"]}>
-            <AssignedStudents />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/mentor/meetings"
-        element={
-          <PrivateRoute allowedRoles={["mentor"]}>
-            <ScheduleMeeting />
-          </PrivateRoute>
-        }
-      />
-
-      {/* ── TEACHER ROUTES CONTROL BLOCK ── */}
+      {/* TEACHER ROUTES */}
       <Route
         path="/teacher/dashboard"
         element={
@@ -191,6 +157,40 @@ export default function AppRoutes() {
         element={
           <PrivateRoute allowedRoles={["teacher"]}>
             <AdminPanel />
+          </PrivateRoute>
+        }
+      />
+
+      {/* ADMIN ROUTES */}
+      <Route
+        path="/admin/dashboard"
+        element={
+          <PrivateRoute allowedRoles={["admin"]}>
+            <AdminDashboard />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/admin/users"
+        element={
+          <PrivateRoute allowedRoles={["admin"]}>
+            <ManageUsers />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/admin/projects"
+        element={
+          <PrivateRoute allowedRoles={["admin"]}>
+            <AllProjectsAdmin />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/admin/logs"
+        element={
+          <PrivateRoute allowedRoles={["admin"]}>
+            <SystemLogs />
           </PrivateRoute>
         }
       />

@@ -1,7 +1,8 @@
-import { NavLink, useNavigate, useLocation } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
-import { getNavForRole } from '../constants/navigation'
-import toast from 'react-hot-toast'
+import { useState } from 'react';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../constants/context/AuthContext';
+import { getNavForRole } from '../constants/navigation';
+import toast from 'react-hot-toast';
 
 export default function DashboardLayout({
   children,
@@ -10,20 +11,30 @@ export default function DashboardLayout({
   portalLabel = 'SPMS Portal',
   accent = '#6366f1',
 }) {
-  const { user, logout } = useAuth()
-  const navigate = useNavigate()
-  const location = useLocation()
-  const navItems = getNavForRole(user?.role)
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const navItems = getNavForRole(user?.role);
 
   const handleLogout = () => {
-    logout()
-    navigate('/login')
-    toast.success('Logged out successfully')
-  }
+    logout();
+    navigate('/login');
+    toast.success('Logged out successfully');
+  };
 
   return (
     <div className="min-h-screen bg-[#070b14] text-slate-100 flex">
-      <aside className="w-64 shrink-0 border-r border-white/10 bg-[#0a0f1c] flex flex-col hidden md:flex">
+      {/* Sidebar Overlay for Mobile */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden" 
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar Component */}
+      <aside className={`fixed top-0 left-0 h-full w-64 shrink-0 border-r border-white/10 bg-[#0a0f1c] z-50 flex flex-col transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
         <div className="p-5 border-b border-white/10">
           <div className="flex items-center gap-3">
             <div
@@ -51,6 +62,7 @@ export default function DashboardLayout({
                     : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'
                 }`
               }
+              onClick={() => setIsSidebarOpen(false)}
             >
               <span>{item.icon}</span>
               {item.label}
@@ -72,34 +84,27 @@ export default function DashboardLayout({
         </div>
       </aside>
 
-      <div className="flex-1 flex flex-col min-w-0">
-        <header className="sticky top-0 z-20 border-b border-white/10 bg-[#070b14]/90 backdrop-blur-md px-4 md:px-8 py-4 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h1 className="text-xl md:text-2xl font-bold text-slate-100" style={{ fontFamily: 'Syne, sans-serif' }}>
-              {title}
-            </h1>
-            {subtitle && <p className="text-slate-500 text-sm mt-0.5">{subtitle}</p>}
-          </div>
-          <div className="flex items-center gap-2 md:hidden overflow-x-auto max-w-full pb-1">
-            {navItems.slice(0, 4).map((item) => (
-              <button
-                key={item.path}
-                type="button"
-                onClick={() => navigate(item.path)}
-                className={`shrink-0 px-3 py-1.5 rounded-lg text-xs border ${
-                  location.pathname === item.path
-                    ? 'border-indigo-500/40 bg-indigo-500/20 text-indigo-300'
-                    : 'border-white/10 text-slate-400'
-                }`}
-              >
-                {item.icon}
-              </button>
-            ))}
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0 md:ml-64 transition-all">
+        <header className="sticky top-0 z-30 border-b border-white/10 bg-[#070b14]/90 backdrop-blur-md px-4 md:px-8 py-4 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <button 
+              className="md:hidden p-2 rounded-lg border border-white/10 hover:bg-white/5"
+              onClick={() => setIsSidebarOpen(true)}
+            >
+              ☰
+            </button>
+            <div>
+              <h1 className="text-xl md:text-2xl font-bold text-slate-100" style={{ fontFamily: 'Syne, sans-serif' }}>
+                {title}
+              </h1>
+              {subtitle && <p className="text-slate-500 text-sm mt-0.5">{subtitle}</p>}
+            </div>
           </div>
         </header>
 
         <main className="flex-1 p-4 md:p-8 overflow-auto">{children}</main>
       </div>
     </div>
-  )
+  );
 }

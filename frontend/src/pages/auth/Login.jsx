@@ -1,140 +1,414 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../constants/context/AuthContext";
 import toast from "react-hot-toast";
 
 export default function Login() {
-  const { login } = useAuth();
-  const navigate = useNavigate();
-  const [form, setForm] = useState({ email: "", password: "" });
-  const [loading, setLoading] = useState(false);
-  const [showPass, setShowPass] = useState(false);
 
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const { login } = useAuth();
+
+  const navigate = useNavigate();
+
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+  });
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [showPass, setShowPass] =
+    useState(false);
+
+  const [rememberMe, setRememberMe] =
+    useState(false);
+
+  const handleChange = (e) => {
+
+    setForm({
+
+      ...form,
+      [e.target.name]: e.target.value,
+
+    });
+
+  };
 
   const handleSubmit = async (e) => {
+
     e.preventDefault();
-    if (!form.email || !form.password)
-      return toast.error("Please enter both email and password!");
-    setLoading(true);
-    try {
-      const user = await login(form.email, form.password);
-      toast.success(`Welcome back, ${user.name}! 🎉`);
-      if (user.role === "student") navigate("/student/dashboard");
-      else if (user.role === "mentor") navigate("/mentor/dashboard");
-      else if (user.role === "teacher") navigate("/teacher/dashboard");
-    } catch (err) {
-      if (err.response?.status === 401) {
-        toast.error("Invalid email or password");
-      } else if (err.response?.status === 400) {
-        toast.error(err.response.data?.message || "Invalid input");
-      } else if (err.request) {
-        toast.error("Unable to connect to server");
-      } else {
-        toast.error("Something went wrong. Please try again");
-      }
-    } finally {
-      setLoading(false);
+
+    if (!form.email || !form.password) {
+
+      return toast.error(
+        "Please enter both email and password!"
+      );
+
     }
+
+    if (!rememberMe) {
+
+      return toast.error(
+        "Please confirm Remember Me to continue."
+      );
+
+    }
+
+    setLoading(true);
+
+    try {
+
+      const user = await login(
+        form.email,
+        form.password
+      );
+
+      toast.success(
+        `Welcome back, ${user.name}! 🚀`
+      );
+
+      if (user.role === "student") {
+
+        navigate("/student/dashboard");
+
+      } else if (user.role === "teacher") {
+
+        navigate("/teacher/dashboard");
+
+      } else if (user.role === "admin") {
+
+        navigate("/admin/dashboard");
+
+      } else {
+
+        navigate("/");
+
+      }
+
+    } catch (err) {
+
+      if (err.response?.status === 401) {
+
+        toast.error(
+          "Invalid email or password"
+        );
+
+      } else {
+
+        toast.error(
+          "Something went wrong. Please try again."
+        );
+
+      }
+
+    } finally {
+
+      setLoading(false);
+
+    }
+
   };
 
   return (
-    <div className="min-h-screen bg-[#060A12] text-[#f8fafc] font-sans flex items-center justify-center px-4 relative overflow-hidden selection:bg-amber-500/25 selection:text-[#f8fafc]">
-      
-      {/* ── Global Custom Animations Injection ──────────────── */}
-      <style>{`
-        @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
-        @keyframes pulseGlow { 0%,100% { opacity:0.5; transform:scale(1); } 50% { opacity:0.8; transform:scale(1.06); } }
-        
-        .fade-up-1 { animation: fadeUp 0.5s ease both; }
-        .fade-up-2 { animation: fadeUp 0.5s ease 0.10s both; }
-        .fade-up-3 { animation: fadeUp 0.5s ease 0.15s both; }
-        .fade-up-4 { animation: fadeUp 0.5s ease 0.20s both; }
-        .animate-pulse-glow { animation: pulseGlow 8s ease-in-out infinite; }
-        .animate-pulse-glow-delayed { animation: pulseGlow 10s ease-in-out infinite 2s; }
-      `}</style>
 
-      {/* ── Ambient Background Blobs ───────────────────────── */}
-      <div aria-hidden className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute -top-[10%] -left-[10%] w-[450px] h-[450px] rounded-full bg-gradient-to-br from-amber-500/5 to-transparent blur-[70px] animate-pulse-glow" />
-        <div className="absolute -bottom-[10%] -right-[10%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-indigo-500/5 to-transparent blur-[80px] animate-pulse-glow-delayed" />
+    <div className="min-h-screen bg-[#060A12] text-[#f8fafc] overflow-hidden relative flex items-center justify-center px-4 py-10">
+
+      {/* Background Glow */}
+
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+
+        <div className="absolute -top-[180px] -left-[180px] w-[450px] h-[450px] rounded-full bg-gradient-to-br from-amber-500/10 to-transparent blur-[100px]" />
+
+        <div className="absolute bottom-[-220px] right-[-220px] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-indigo-500/10 to-transparent blur-[120px]" />
+
       </div>
 
-      {/* ── Main Login Card ────────────────────────────────── */}
-      <div className="relative z-10 w-full max-w-md bg-white/[0.03] border border-white/5 backdrop-blur-xl rounded-3xl p-8 shadow-2xl shadow-black/40">
-        
-        <div className="fade-up-1 mb-6 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#f59e0b] to-[#f97316] text-2xl shadow-lg shadow-amber-500/20">
-            🎓
+      {/* Main Container */}
+
+      <div className="relative z-10 w-full max-w-6xl grid lg:grid-cols-2 overflow-hidden rounded-[32px] border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-2xl">
+
+        {/* LEFT SIDE */}
+
+        <div className="hidden lg:flex flex-col justify-between p-12 border-r border-white/5 relative overflow-hidden">
+
+          <div>
+
+            <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 rounded-full px-4 py-2">
+
+              <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+
+              <span className="text-xs font-semibold tracking-widest uppercase text-amber-300">
+
+                SPMS Platform
+
+              </span>
+
+            </div>
+
+            <h1 className="text-5xl font-black leading-tight mt-8">
+
+              Welcome
+              <br />
+
+              Back 👋
+
+            </h1>
+
+            <p className="text-slate-400 mt-6 leading-relaxed max-w-md">
+
+              Access your student project ecosystem,
+              collaborate with teams, manage projects,
+              and monitor academic progress in real-time.
+
+            </p>
+
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-[#f8fafc]">Welcome Back</h1>
-          <p className="mt-2 text-sm text-[#64748b]">
-            SPMS — Student Project Management System
-          </p>
+
+          {/* Avatar Card */}
+
+          <div className="bg-white/[0.03] border border-white/5 rounded-3xl p-6 backdrop-blur-md">
+
+            <div className="flex items-center gap-5">
+
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-3xl font-black shadow-2xl shadow-amber-500/20">
+
+                SP
+
+              </div>
+
+              <div>
+
+                <h3 className="text-xl font-bold">
+                  Smart Project Management
+                </h3>
+
+                <p className="text-sm text-slate-400 mt-1">
+                  Secure • Modern • Collaborative
+                </p>
+
+              </div>
+
+            </div>
+
+          </div>
+
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-          {/* Email Field */}
-          <div className="fade-up-2">
-            <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-[#64748b]">
-              Email Address
-            </label>
-            <input
-              type="email"
-              name="email"
-              placeholder="Enter your email address"
-              value={form.email}
-              onChange={handleChange}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-[#f8fafc] placeholder-[#334155] focus:outline-none focus:border-amber-500/40 focus:bg-white/[0.07] transition-all duration-200"
-            />
-          </div>
+        {/* RIGHT SIDE */}
 
-          {/* Password Field */}
-          <div className="fade-up-3 relative">
-            <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-[#64748b]">
-              Password
-            </label>
-            <input
-              type={showPass ? "text" : "password"}
-              name="password"
-              placeholder="Enter your account password"
-              value={form.password}
-              onChange={handleChange}
-              className="w-full bg-white/5 border border-white/10 rounded-xl pl-4 pr-12 py-3 text-sm text-[#f8fafc] placeholder-[#334155] focus:outline-none focus:border-amber-500/40 focus:bg-white/[0.07] transition-all duration-200"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPass(!showPass)}
-              className="absolute right-4 bottom-3 text-base text-[#64748b] hover:text-[#cbd5e1] transition-colors focus:outline-none"
+        <div className="p-6 sm:p-10 lg:p-14 flex items-center">
+
+          <div className="w-full">
+
+            {/* Mobile Logo */}
+
+            <div className="flex lg:hidden justify-center mb-10">
+
+              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-4xl font-black shadow-2xl shadow-amber-500/20">
+
+                SP
+
+              </div>
+
+            </div>
+
+            {/* Heading */}
+
+            <div className="mb-10">
+
+              <h2 className="text-3xl md:text-4xl font-black">
+
+                Login To Continue
+
+              </h2>
+
+              <p className="text-slate-400 mt-3">
+
+                Enter your credentials to access the platform.
+
+              </p>
+
+            </div>
+
+            {/* FORM */}
+
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-5"
             >
-              {showPass ? "🙈" : "👁️"}
-            </button>
+
+              {/* Email */}
+
+              <div>
+
+                <label className="text-sm text-slate-400 mb-2 block">
+
+                  Email Address
+
+                </label>
+
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="you@example.com"
+                  value={form.email}
+                  onChange={handleChange}
+                  className="
+                    w-full
+                    bg-white/[0.04]
+                    border border-white/10
+                    rounded-2xl
+                    px-5 py-4
+                    outline-none
+                    transition-all
+                    focus:border-amber-500/30
+                    focus:bg-white/[0.06]
+                  "
+                />
+
+              </div>
+
+              {/* Password */}
+
+              <div>
+
+                <label className="text-sm text-slate-400 mb-2 block">
+
+                  Password
+
+                </label>
+
+                <div className="relative">
+
+                  <input
+                    type={
+                      showPass
+                        ? "text"
+                        : "password"
+                    }
+                    name="password"
+                    placeholder="••••••••"
+                    value={form.password}
+                    onChange={handleChange}
+                    className="
+                      w-full
+                      bg-white/[0.04]
+                      border border-white/10
+                      rounded-2xl
+                      px-5 py-4
+                      pr-16
+                      outline-none
+                      transition-all
+                      focus:border-amber-500/30
+                      focus:bg-white/[0.06]
+                    "
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setShowPass(!showPass)
+                    }
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-slate-400 hover:text-white transition-all"
+                  >
+
+                    {showPass
+                      ? "Hide"
+                      : "Show"}
+
+                  </button>
+
+                </div>
+
+              </div>
+
+              {/* Remember + Forgot */}
+
+              <div className="flex items-center justify-between text-sm">
+
+                <label className="flex items-center gap-2 text-slate-400 cursor-pointer">
+
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={() =>
+                      setRememberMe(!rememberMe)
+                    }
+                    className="accent-amber-500"
+                  />
+
+                  Remember me
+
+                </label>
+
+                <Link
+                  to="/forgot-password"
+                  className="text-amber-400 hover:text-amber-300 transition-all"
+                >
+
+                  Forgot Password?
+
+                </Link>
+
+              </div>
+
+              {/* Button */}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="
+                  w-full
+                  py-4
+                  rounded-2xl
+                  bg-gradient-to-r
+                  from-amber-400
+                  to-orange-500
+                  text-black
+                  font-black
+                  text-lg
+                  transition-all
+                  hover:scale-[1.02]
+                  hover:shadow-2xl
+                  hover:shadow-amber-500/20
+                  disabled:opacity-60
+                "
+              >
+
+                {loading
+                  ? "Authenticating..."
+                  : "Login →"}
+
+              </button>
+
+            </form>
+
+            {/* Footer */}
+
+            <p className="mt-8 text-center text-sm text-slate-400">
+
+              Don’t have an account?
+              {" "}
+
+              <Link
+                to="/register"
+                className="text-amber-400 font-bold hover:text-amber-300 transition-all"
+              >
+
+                Create Account
+
+              </Link>
+
+            </p>
+
           </div>
 
-          {/* Submit Action */}
-          <div className="fade-up-4 mt-2">
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full inline-flex items-center justify-center px-6 py-3.5 text-sm font-bold text-white bg-gradient-to-br from-[#f59e0b] to-[#f97316] rounded-xl shadow-lg shadow-amber-500/25 hover:scale-[1.01] hover:shadow-amber-500/40 transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none"
-            >
-              {loading ? "Logging in..." : "Login →"}
-            </button>
-          </div>
-        </form>
-
-        {/* Form Footer Link */}
-        <div className="mt-8 text-center text-sm text-[#64748b]">
-          Don't have an account?{" "}
-          <Link
-            to="/register"
-            className="font-semibold text-[#fbbf24] hover:text-[#f59e0b] transition-colors no-underline ml-1"
-          >
-            Sign up
-          </Link>
         </div>
+
       </div>
+
     </div>
+
   );
+
 }

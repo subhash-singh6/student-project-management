@@ -8,8 +8,9 @@ const createSubmission = async (req, res) => {
 
     const proj = await Project.findById(project);
     if (!proj) return res.status(404).json({ message: "Project not found." });
+    
     if (proj.createdBy.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: "Sirf apne project par submit kar sakte ho." });
+      return res.status(403).json({ message: "You can only submit files to your own project." });
     }
 
     const version =
@@ -35,7 +36,7 @@ const createSubmission = async (req, res) => {
         sender: req.user._id,
         type: "submission_received",
         title: "New Submission Received",
-        message: `${req.user.name} submitted "${title}" for project "${proj.title}" (v${version})`,
+        message: `${req.user.name} has submitted "${title}" for project "${proj.title}" (v${version})`,
       });
     }
 
@@ -84,7 +85,7 @@ const reviewSubmission = async (req, res) => {
       sender: req.user._id,
       type: "submission_reviewed",
       title: "Submission Reviewed",
-      message: `Your submission "${submission.title}" was marked as ${status}.`,
+      message: `Your submission "${submission.title}" status has been updated to "${status}".`,
     });
 
     res.status(200).json({ success: true, submission });

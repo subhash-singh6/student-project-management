@@ -1,7 +1,7 @@
 // frontend/src/pages/teacher/TeacherDashboard.jsx
 
 import { useState, useEffect } from 'react'
-import { useAuth } from '../../context/AuthContext'
+import { useAuth } from '../../constants/context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import API from '../../api/axios'
 import toast from 'react-hot-toast'
@@ -141,7 +141,7 @@ export default function TeacherDashboard() {
           <div className="flex flex-col sm:flex-row justify-between items-center gap-6 relative z-10">
             <div className="text-center sm:text-left">
               <div className="text-xs font-extrabold text-amber-400 uppercase tracking-widest mb-1.5">{greeting()} Panel</div>
-              <h1 className="text-3xl sm:text-5xl font-black tracking-tighter text-white mb-5">{user?.name}</h1>
+              <h1 className="text-2xl sm:text-4xl font-black tracking-tighter text-white mb-5">{user?.name}</h1>
               
               <div className="flex flex-wrap gap-2.5 justify-center sm:justify-start">
                 {user?.department && <span className="bg-white/[0.04] border border-white/5 text-[#94a3b8] px-3 py-1 rounded-lg text-xs font-semibold">🏫 Dept: {user.department}</span>}

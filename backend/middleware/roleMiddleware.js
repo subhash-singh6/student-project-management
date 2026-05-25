@@ -1,9 +1,9 @@
-// Specific roles ko allow karne ke liye
+// 📄 Location: backend/middleware/roleMiddleware.js
 const allowRoles = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({
-        message: `Access denied. Sirf ${roles.join(", ")} hi yeh kar sakte hain.`,
+        message: `Access denied. Only users with roles (${roles.join(", ")}) can perform this action.`,
       });
     }
     next();

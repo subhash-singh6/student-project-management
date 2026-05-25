@@ -121,13 +121,13 @@ export default function Landing() {
         <section className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10 pt-24 pb-20 text-center">
           
           {/* Badge */}
-          <div className="fade-up-1 inline-flex items-center gap-2 bg-amber-500/5 border border-amber-500/20 rounded-full px-5 py-2 mb-8">
+          {/* <div className="fade-up-1 inline-flex items-center gap-2 bg-amber-500/5 border border-amber-500/20 rounded-full px-5 py-2 mb-8">
             <span className="w-1.5 h-1.5 rounded-full bg-[#f59e0b] inline-block shadow-[0_0_8px_#f59e0b]" />
             <span className="text-xs font-semibold text-[#fbbf24] tracking-widest uppercase">Final Year Project Platform</span>
-          </div>
+          </div> */}
 
           {/* Headline */}
-          <h1 className="fade-up-2 font-display font-extrabold text-4xl sm:text-6xl lg:text-7xl tracking-tight leading-[1.08] text-[#f8fafc] mb-6">
+          <h1 className="fade-up-2 font-display font-bold text-4xl sm:text-6xl lg:text-7xl tracking-tight leading-[1.08] text-[#f8fafc] mb-6">
             Track, Collaborate &<br />
             <span className="shimmer-text">Complete Projects Smarter</span>
           </h1>

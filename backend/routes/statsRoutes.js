@@ -12,6 +12,6 @@ router.use(protect);
 
 router.get("/leaderboard", getLeaderboard);
 router.get("/me", getMyStats);
-router.get("/system", allowRoles("teacher"), getSystemStats);
+router.get("/system", allowRoles("teacher", "admin"), getSystemStats); // Admin ko bhi view allow kiya
 
 module.exports = router;

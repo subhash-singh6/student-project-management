@@ -1,7 +1,7 @@
 // frontend/src/pages/mentor/MentorDashboard.jsx
 
 import { useState, useEffect } from 'react'
-import { useAuth } from '../../context/AuthContext'
+import { useAuth } from '../../constants/context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import API from '../../api/axios'
 import toast from 'react-hot-toast'

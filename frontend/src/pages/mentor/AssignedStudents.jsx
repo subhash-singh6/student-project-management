@@ -8,7 +8,7 @@ import toast from 'react-hot-toast'
 export default function AssignedStudents() {
   const navigate = useNavigate()
   const [students, setStudents] = useState([])
-  const [loading, setLoading]   = useState(true)
+  const [loading, setLoading] = useState(true)
   const [selectedStudent, setSelectedStudent] = useState(null)
   const [feedback, setFeedback] = useState('')
   const [projects, setProjects] = useState([])
@@ -16,7 +16,9 @@ export default function AssignedStudents() {
   const [showFeedback, setShowFeedback] = useState(false)
   const [submitting, setSubmitting] = useState(false)
 
-  useEffect(() => { fetchData() }, [])
+  useEffect(() => {
+    fetchData()
+  }, [])
 
   const fetchData = async () => {
     try {
@@ -27,7 +29,7 @@ export default function AssignedStudents() {
       setStudents(stuRes.data.students || [])
       setProjects(projRes.data.projects || [])
     } catch (err) {
-      toast.error('Data load nahi hua!')
+      toast.error('Failed to load data!')
     } finally {
       setLoading(false)
     }
@@ -35,102 +37,154 @@ export default function AssignedStudents() {
 
   const handleFeedback = async (e) => {
     e.preventDefault()
-    if (!feedback || !selectedProject) return toast.error('Feedback aur project select karo!')
+    if (!feedback || !selectedProject) return toast.error('Please select a project and enter feedback!')
     setSubmitting(true)
     try {
       await API.post('/mentor/feedback', { projectId: selectedProject, feedback })
-      toast.success('Feedback de diya! 🎉')
+      toast.success('Feedback sent successfully! 🎉')
       setShowFeedback(false)
       setFeedback('')
       setSelectedProject('')
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Error aaya!')
+      toast.error(err.response?.data?.message || 'An error occurred!')
     } finally {
       setSubmitting(false)
     }
   }
 
-  if (loading) return (
-    <div style={{ minHeight:'100vh',background:'#070b14',display:'flex',alignItems:'center',justifyContent:'center' }}>
-      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-      <div style={{ width:40,height:40,border:'3px solid rgba(99,102,241,0.2)',borderTop:'3px solid #6366f1',borderRadius:'50%',animation:'spin 1s linear infinite' }} />
-    </div>
-  )
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="h-10 w-10 rounded-full border-4 border-indigo-500/20 border-t-indigo-500 animate-spin" />
+      </div>
+    )
+  }
 
   return (
-    <div style={{ minHeight:'100vh',background:'#070b14',fontFamily:"'DM Sans',sans-serif" }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap');
-        @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-        .stu-card:hover{border-color:rgba(99,102,241,0.3) !important;transform:translateY(-2px);}
-      `}</style>
-
-      <div style={{ maxWidth:900,margin:'0 auto',padding:'32px 24px' }}>
-
-        <div style={{ marginBottom:32,animation:'fadeUp 0.4s ease' }}>
-          <button onClick={()=>navigate('/mentor/dashboard')} style={{ background:'none',border:'none',color:'#475569',cursor:'pointer',fontSize:13,marginBottom:8,display:'block',padding:0 }}>← Back to Dashboard</button>
-          <h1 style={{ fontFamily:'Syne,sans-serif',fontSize:28,fontWeight:800,color:'#f1f5f9',margin:0,letterSpacing:'-1px' }}>👨‍🎓 Assigned Students</h1>
-          <p style={{ color:'#475569',fontSize:13,marginTop:4 }}>{students.length} student{students.length!==1?'s':''} assigned</p>
+    <div className="min-h-screen bg-slate-950 font-sans">
+      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+        <div className="mb-8">
+          <button
+            onClick={() => navigate('/mentor/dashboard')}
+            className="mb-2 inline-flex items-center text-sm text-slate-400 transition-colors hover:text-slate-200"
+          >
+            ← Back to Dashboard
+          </button>
+          <h1 className="text-2xl font-extrabold tracking-tight text-slate-100 sm:text-3xl">
+            Assigned Students
+          </h1>
+          <p className="mt-1 text-sm text-slate-500">
+            {students.length} student{students.length !== 1 ? 's' : ''} assigned
+          </p>
         </div>
 
-        {/* Feedback Form */}
         {showFeedback && selectedStudent && (
-          <div style={{ background:'rgba(15,23,42,0.95)',border:'1px solid rgba(99,102,241,0.3)',borderRadius:20,padding:28,marginBottom:24,animation:'fadeUp 0.3s ease' }}>
-            <h2 style={{ fontFamily:'Syne,sans-serif',color:'#f1f5f9',fontSize:18,margin:'0 0 6px' }}>💬 Give Feedback</h2>
-            <p style={{ color:'#475569',fontSize:13,margin:'0 0 20px' }}>To: {selectedStudent.name}</p>
-            <form onSubmit={handleFeedback} style={{ display:'flex',flexDirection:'column',gap:14 }}>
+          <div className="mb-6 rounded-2xl border border-indigo-500/30 bg-slate-900/95 p-5 shadow-lg sm:p-7">
+            <h2 className="text-lg font-bold text-slate-100">Give Feedback</h2>
+            <p className="mt-1 text-sm text-slate-500">To: {selectedStudent.name}</p>
+
+            <form onSubmit={handleFeedback} className="mt-5 flex flex-col gap-4">
               <div>
-                <label style={{ fontSize:12,color:'#475569',marginBottom:6,display:'block',textTransform:'uppercase',letterSpacing:1 }}>Select Project *</label>
-                <select value={selectedProject} onChange={e=>setSelectedProject(e.target.value)} className="custom-input">
-                  <option value="">Project select karo</option>
-                  {projects.map(p=>(
-                    <option key={p._id} value={p._id}>{p.title}</option>
+                <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  Select Project *
+                </label>
+                <select
+                  value={selectedProject}
+                  onChange={(e) => setSelectedProject(e.target.value)}
+                  className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-indigo-500"
+                >
+                  <option value="">Select a project</option>
+                  {projects.map((p) => (
+                    <option key={p._id} value={p._id}>
+                      {p.title}
+                    </option>
                   ))}
                 </select>
               </div>
+
               <div>
-                <label style={{ fontSize:12,color:'#475569',marginBottom:6,display:'block',textTransform:'uppercase',letterSpacing:1 }}>Feedback *</label>
-                <textarea value={feedback} onChange={e=>setFeedback(e.target.value)} placeholder="Apna feedback yahan likho..." className="custom-input" rows={4} style={{ resize:'vertical' }} />
+                <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  Feedback *
+                </label>
+                <textarea
+                  value={feedback}
+                  onChange={(e) => setFeedback(e.target.value)}
+                  placeholder="Write your feedback here..."
+                  rows={4}
+                  className="w-full resize-y rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-indigo-500"
+                />
               </div>
-              <div style={{ display:'flex',gap:10 }}>
-                <button type="submit" disabled={submitting} style={{ flex:1,background:'linear-gradient(135deg,#6366f1,#818cf8)',border:'none',borderRadius:10,padding:'12px',color:'white',cursor:'pointer',fontFamily:'Syne,sans-serif',fontWeight:700,fontSize:14 }}>
-                  {submitting?'Sending...':'Send Feedback →'}
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-400 px-4 py-3 text-sm font-bold text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {submitting ? 'Sending...' : 'Send Feedback →'}
                 </button>
-                <button type="button" onClick={()=>setShowFeedback(false)} style={{ flex:1,background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:10,color:'#94a3b8',cursor:'pointer',fontFamily:'Syne,sans-serif',fontWeight:600 }}>Cancel</button>
+                <button
+                  type="button"
+                  onClick={() => setShowFeedback(false)}
+                  className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-slate-400 transition hover:bg-white/10 hover:text-slate-200"
+                >
+                  Cancel
+                </button>
               </div>
             </form>
           </div>
         )}
 
-        {/* Students List */}
-        {students.length===0 ? (
-          <div style={{ textAlign:'center',padding:'80px 0',background:'rgba(15,23,42,0.9)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:24 }}>
-            <div style={{ fontSize:56,marginBottom:16,opacity:0.3 }}>👨‍🎓</div>
-            <p style={{ color:'#475569',fontSize:16 }}>Koi student assign nahi hua abhi.</p>
-            <p style={{ color:'#334155',fontSize:13,marginTop:8 }}>Teacher aapko students assign karega.</p>
+        {students.length === 0 ? (
+          <div className="rounded-3xl border border-white/5 bg-slate-900/90 py-20 text-center">
+            <div className="mb-4 text-6xl opacity-30">👨‍🎓</div>
+            <p className="text-base text-slate-400">No students have been assigned yet.</p>
+            <p className="mt-2 text-sm text-slate-600">Your teacher will assign students to you.</p>
           </div>
         ) : (
-          <div style={{ display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:16 }}>
-            {students.map((s,i)=>(
-              <div key={s._id} className="stu-card" style={{ background:'rgba(15,23,42,0.9)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:20,padding:24,transition:'all 0.25s',animation:`fadeUp 0.4s ease ${i*0.08}s both` }}>
-                <div style={{ display:'flex',alignItems:'center',gap:14,marginBottom:16 }}>
-                  <div style={{ width:48,height:48,background:'linear-gradient(135deg,#6366f1,#22d3ee)',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontWeight:800,fontSize:18,flexShrink:0 }}>
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {students.map((s) => (
+              <div
+                key={s._id}
+                className="rounded-2xl border border-white/5 bg-slate-900/90 p-6 transition-transform duration-200 hover:-translate-y-0.5 hover:border-indigo-500/30"
+              >
+                <div className="mb-4 flex items-center gap-4">
+                  <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-cyan-400 text-lg font-extrabold text-white">
                     {s.name?.charAt(0).toUpperCase()}
                   </div>
-                  <div>
-                    <div style={{ color:'#f1f5f9',fontSize:15,fontWeight:700,fontFamily:'Syne,sans-serif' }}>{s.name}</div>
-                    <div style={{ color:'#475569',fontSize:12,marginTop:2 }}>{s.email}</div>
+                  <div className="min-w-0">
+                    <div className="truncate text-base font-bold text-slate-100">{s.name}</div>
+                    <div className="truncate text-sm text-slate-500">{s.email}</div>
                   </div>
                 </div>
-                <div style={{ display:'flex',gap:8,marginBottom:16,flexWrap:'wrap' }}>
-                  {s.branch && <span style={{ background:'rgba(255,255,255,0.05)',color:'#94a3b8',padding:'3px 10px',borderRadius:20,fontSize:12 }}>🏫 {s.branch}</span>}
-                  {s.semester && <span style={{ background:'rgba(255,255,255,0.05)',color:'#94a3b8',padding:'3px 10px',borderRadius:20,fontSize:12 }}>📚 Sem {s.semester}</span>}
+
+                <div className="mb-4 flex flex-wrap gap-2">
+                  {s.branch && (
+                    <span className="rounded-full bg-white/5 px-3 py-1 text-xs text-slate-400">
+                      🏫 {s.branch}
+                    </span>
+                  )}
+                  {s.semester && (
+                    <span className="rounded-full bg-white/5 px-3 py-1 text-xs text-slate-400">
+                      📚 Sem {s.semester}
+                    </span>
+                  )}
                 </div>
-                <div style={{ display:'flex',gap:8 }}>
-                  <button onClick={()=>{setSelectedStudent(s);setShowFeedback(true)}} style={{ flex:1,background:'rgba(99,102,241,0.12)',border:'1px solid rgba(99,102,241,0.2)',borderRadius:10,padding:'8px',color:'#818cf8',cursor:'pointer',fontSize:12,fontWeight:600,fontFamily:'Syne,sans-serif' }}>
+
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <button
+                    onClick={() => {
+                      setSelectedStudent(s)
+                      setShowFeedback(true)
+                    }}
+                    className="rounded-xl border border-indigo-500/20 bg-indigo-500/10 px-3 py-2 text-sm font-semibold text-indigo-300 transition hover:bg-indigo-500/15"
+                  >
                     💬 Feedback
                   </button>
-                  <button onClick={()=>navigate('/mentor/meetings')} style={{ flex:1,background:'rgba(34,211,238,0.1)',border:'1px solid rgba(34,211,238,0.2)',borderRadius:10,padding:'8px',color:'#22d3ee',cursor:'pointer',fontSize:12,fontWeight:600,fontFamily:'Syne,sans-serif' }}>
+                  <button
+                    onClick={() => navigate('/mentor/meetings')}
+                    className="rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-3 py-2 text-sm font-semibold text-cyan-300 transition hover:bg-cyan-500/15"
+                  >
                     📅 Meeting
                   </button>
                 </div>

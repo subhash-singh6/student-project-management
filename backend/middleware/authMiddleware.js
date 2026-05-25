@@ -1,3 +1,4 @@
+// 📄 Location: backend/middleware/authMiddleware.js
 const jwt  = require("jsonwebtoken");
 const User = require("../models/User");
 
@@ -9,7 +10,7 @@ const protect = async (req, res, next) => {
   }
 
   if (!token) {
-    return res.status(401).json({ message: "Access denied. Pehle login karo." });
+    return res.status(401).json({ message: "Access denied. Please login first." });
   }
 
   try {
@@ -17,11 +18,16 @@ const protect = async (req, res, next) => {
     req.user = await User.findById(decoded.id).select("-password");
 
     if (!req.user) {
-      return res.status(401).json({ message: "User nahi mila. Login karo." });
+      return res.status(401).json({ message: "User account not found. Please login again." });
     }
+
+    if (!req.user.isActive) {
+      return res.status(403).json({ message: "Your account is currently deactivated. Please contact your administrator." });
+    }
+
     next();
   } catch (error) {
-    return res.status(401).json({ message: "Invalid token. Login karo." });
+    return res.status(401).json({ message: "Invalid or expired session token. Please login again." });
   }
 };
 

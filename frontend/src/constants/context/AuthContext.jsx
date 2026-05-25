@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import API from "../api/axios";
+import API from "../../api/axios";
 
 const AuthContext = createContext(null);
 
@@ -9,47 +9,49 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    const savedUser = localStorage.getItem("user");
-
-    if (token && savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-      }
+    if (token) {
+      checkAuthStatus();
+    } else {
+      setLoading(false);
     }
-
-    setLoading(false);
   }, []);
+
+  const checkAuthStatus = async () => {
+    try {
+      const res = await API.get("/auth/me");
+      // FIX: Backend se user object nikalo (agar structure {user: ...} hai)
+      setUser(res.data.user); 
+    } catch (error) {
+      logout();
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const login = async (email, password) => {
     const res = await API.post("/auth/login", { email, password });
     localStorage.setItem("token", res.data.token);
-    localStorage.setItem("user", JSON.stringify(res.data.user));
+    // FIX: Sahi path se user set karo
     setUser(res.data.user);
     return res.data.user;
   };
 
   const register = async (formData) => {
     const res = await API.post("/auth/register", formData);
-    if (res.data.token) {
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
-      setUser(res.data.user);
-    }
+    localStorage.setItem("token", res.data.token);
+    setUser(res.data.user);
     return res.data.user;
   };
 
   const logout = () => {
     localStorage.removeItem("token");
-    localStorage.removeItem("user");
     setUser(null);
+    window.location.href = "/login";
   };
 
   return (
     <AuthContext.Provider value={{ user, login, register, logout, loading }}>
-      {children}
+      {!loading && children}
     </AuthContext.Provider>
   );
 };

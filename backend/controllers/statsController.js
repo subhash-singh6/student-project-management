@@ -1,6 +1,6 @@
-const Project = require("../models/Project");
-const User = require("../models/User");
-const Team = require("../models/Team");
+const Project    = require("../models/Project");
+const User       = require("../models/User");
+const Team       = require("../models/Team");
 const Submission = require("../models/Submission");
 
 const calcPoints = (projects) => {
@@ -15,10 +15,11 @@ const calcPoints = (projects) => {
   return pts;
 };
 
+// @route GET /api/stats/leaderboard
 const getLeaderboard = async (req, res) => {
   try {
     const projects = await Project.find({ isActive: true })
-      .populate("createdBy", "name email branch enrollmentNumber avatar");
+      .populate("createdBy", "name email branch enrollmentNumber avatar role");
 
     const studentMap = {};
     projects.forEach((p) => {
@@ -54,6 +55,7 @@ const getLeaderboard = async (req, res) => {
   }
 };
 
+// @route GET /api/stats/system
 const getSystemStats = async (req, res) => {
   try {
     const [users, projects, teams, submissions] = await Promise.all([
@@ -87,11 +89,13 @@ const getSystemStats = async (req, res) => {
   }
 };
 
+// @route GET /api/stats/my
 const getMyStats = async (req, res) => {
   try {
     let projectQuery = {};
     if (req.user.role === "student") projectQuery.createdBy = req.user._id;
-    if (req.user.role === "mentor") projectQuery.mentor = req.user._id;
+    if (req.user.role === "teacher") projectQuery.teacher = req.user._id;
+    // Admin ko pure institution stats milenge
 
     const projects = await Project.find(projectQuery);
     const submissions = await Submission.countDocuments({

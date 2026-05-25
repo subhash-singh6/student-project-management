@@ -20,4 +20,4 @@ router.put("/change-password", changePassword)
 router.post("/avatar",        uploadAvatarMiddleware.single("avatar"), uploadAvatar)
 router.get("/:id",            getUserById)
 
-module.exports = router
+module.exports = router;

@@ -6,11 +6,11 @@ import API from '../../api/axios'
 import toast from 'react-hot-toast'
 
 const STATUS_MAP = {
-  pending:       { color:'#f59e0b', bg:'rgba(245,158,11,0.12)',  label:'⏳ Pending' },
-  approved:      { color:'#10b981', bg:'rgba(16,185,129,0.12)',  label:'✅ Approved' },
-  'in-progress': { color:'#818cf8', bg:'rgba(129,140,248,0.12)', label:'🔄 In Progress' },
-  completed:     { color:'#22d3ee', bg:'rgba(34,211,238,0.12)',  label:'🏆 Completed' },
-  rejected:      { color:'#ef4444', bg:'rgba(239,68,68,0.12)',   label:'❌ Rejected' },
+  pending:       { theme: 'text-amber-400 bg-amber-500/12 border-amber-500/20',   label: '⏳ Pending' },
+  approved:      { theme: 'text-emerald-400 bg-emerald-500/12 border-emerald-500/20', label: '✅ Approved' },
+  'in-progress': { theme: 'text-indigo-400 bg-indigo-500/12 border-indigo-500/20', label: '🔄 In Progress' },
+  completed:     { theme: 'text-cyan-400 bg-cyan-500/12 border-cyan-500/20',   label: '🏆 Completed' },
+  rejected:      { theme: 'text-red-400 bg-red-500/12 border-red-500/20',     label: '❌ Rejected' },
 }
 
 export default function AllProjects() {
@@ -28,7 +28,12 @@ export default function AllProjects() {
   useEffect(() => {
     let list = projects
     if (filter !== 'all') list = list.filter(p => p.status === filter)
-    if (search) list = list.filter(p => p.title.toLowerCase().includes(search.toLowerCase()) || p.createdBy?.name?.toLowerCase().includes(search.toLowerCase()))
+    if (search) {
+      list = list.filter(p => 
+        p.title.toLowerCase().includes(search.toLowerCase()) || 
+        p.createdBy?.name?.toLowerCase().includes(search.toLowerCase())
+      )
+    }
     setFiltered(list)
   }, [projects, filter, search])
 
@@ -56,98 +61,157 @@ export default function AllProjects() {
   }
 
   if (loading) return (
-    <div style={{ minHeight:'100vh',background:'#070b14',display:'flex',alignItems:'center',justifyContent:'center' }}>
-      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-      <div style={{ width:40,height:40,border:'3px solid rgba(99,102,241,0.2)',borderTop:'3px solid #6366f1',borderRadius:'50%',animation:'spin 1s linear infinite' }} />
+    <div className="min-h-screen bg-[#070b14] flex items-center justify-center">
+      <div className="w-10 h-10 border-3 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin" />
     </div>
   )
 
   return (
-    <div style={{ minHeight:'100vh',background:'#070b14',fontFamily:"'DM Sans',sans-serif" }}>
+    <div className="min-h-screen bg-[#070b14] font-sans antialiased text-slate-200">
+      {/* Dynamic Font and Base Layer Animations */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap');
-        @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-        .proj-card:hover{border-color:rgba(99,102,241,0.25) !important;}
-        .filter-btn:hover{background:rgba(255,255,255,0.06) !important;}
+        @keyframes fadeUp { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:translateY(0) } }
+        .animate-fadeUp { animation: fadeUp 0.4s ease both; }
       `}</style>
 
-      <div style={{ maxWidth:1100,margin:'0 auto',padding:'32px 24px' }}>
+      <div className="max-w-5xl mx-auto px-6 py-8">
 
-        {/* Header */}
-        <div style={{ marginBottom:28,animation:'fadeUp 0.4s ease' }}>
-          <button onClick={()=>navigate('/teacher/dashboard')} style={{ background:'none',border:'none',color:'#475569',cursor:'pointer',fontSize:13,marginBottom:8,display:'block',padding:0 }}>← Back to Dashboard</button>
-          <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',flexWrap:'wrap',gap:12 }}>
+        {/* Header Control Panel */}
+        <div className="mb-7 animate-fadeUp">
+          <button 
+            onClick={() => navigate('/teacher/dashboard')} 
+            className="bg-transparent border-none text-slate-500 hover:text-slate-300 transition-colors cursor-pointer text-xs font-medium mb-2 block p-0"
+          >
+            ← Back to Dashboard
+          </button>
+          
+          <div className="flex justify-between items-center flex-wrap gap-3">
             <div>
-              <h1 style={{ fontFamily:'Syne,sans-serif',fontSize:28,fontWeight:800,color:'#f1f5f9',margin:0,letterSpacing:'-1px' }}>📁 All Projects</h1>
-              <p style={{ color:'#475569',fontSize:13,marginTop:4 }}>{filtered.length} of {projects.length} projects</p>
+              <h1 className="font-syne text-3xl font-normal text-slate-100 tracking-tight m-0">📁 All Projects</h1>
+              <p className="text-slate-500 text-xs mt-1 font-medium">{filtered.length} of {projects.length} clusters deployed</p>
             </div>
-            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="🔍 Search projects or students..." className="custom-input" style={{ width:280 }} />
+            <input 
+              value={search} 
+              onChange={e => setSearch(e.target.value)} 
+              placeholder="🔍 Search projects or students..." 
+              className="w-72 bg-white/[0.02] border border-white/5 focus:border-indigo-500/30 rounded-xl px-4 py-2.5 text-sm text-slate-200 placeholder-slate-600 font-medium outline-none transition-all"
+            />
           </div>
         </div>
 
-        {/* Filters */}
-        <div style={{ display:'flex',gap:8,marginBottom:24,flexWrap:'wrap',animation:'fadeUp 0.4s ease 0.1s both' }}>
-          {['all','pending','approved','in-progress','completed','rejected'].map(f=>(
-            <button key={f} className="filter-btn" onClick={()=>setFilter(f)} style={{ background:filter===f?'rgba(99,102,241,0.2)':'rgba(255,255,255,0.03)',border:`1px solid ${filter===f?'rgba(99,102,241,0.4)':'rgba(255,255,255,0.07)'}`,borderRadius:20,padding:'6px 16px',color:filter===f?'#818cf8':'#64748b',cursor:'pointer',fontSize:13,fontWeight:filter===f?600:400,transition:'all 0.2s',textTransform:'capitalize' }}>
-              {f==='all'?`All (${projects.length})`:f}
-            </button>
-          ))}
+        {/* Dynamic State Filtering System */}
+        <div className="flex gap-2 mb-6 flex-wrap animate-fadeUp" style={{ animationDelay: '0.1s' }}>
+          {['all', 'pending', 'approved', 'in-progress', 'completed', 'rejected'].map(f => {
+            const isActive = filter === f
+            return (
+              <button 
+                key={f} 
+                onClick={() => setFilter(f)} 
+                className={`px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all border cursor-pointer capitalize
+                  ${isActive 
+                    ? 'bg-indigo-500/20 text-indigo-400 border-indigo-500/40' 
+                    : 'bg-white/[0.03] text-slate-500 border-white/[0.07] hover:bg-white/[0.08] hover:text-slate-300'
+                  }`}
+              >
+                {f === 'all' ? `All (${projects.length})` : f}
+              </button>
+            )
+          })}
         </div>
 
-        {/* Projects */}
-        {filtered.length===0 ? (
-          <div style={{ textAlign:'center',padding:'60px 0',color:'#475569' }}>
-            <div style={{ fontSize:48,marginBottom:12,opacity:0.2 }}>📁</div>
-            <p>Koi project nahi mila.</p>
+        {/* Core Project Cards Framework Container */}
+        {filtered.length === 0 ? (
+          <div className="text-center py-16 text-slate-600 animate-fadeUp">
+            <div className="text-5xl mb-3 opacity-20">📁</div>
+            <p className="text-sm font-medium">No system metrics match this parameters configuration.</p>
           </div>
         ) : (
-          <div style={{ display:'flex',flexDirection:'column',gap:14 }}>
-            {filtered.map((p,i)=>{
-              const st = STATUS_MAP[p.status]||STATUS_MAP.pending
+          <div className="flex flex-col gap-3.5">
+            {filtered.map((p, i) => {
+              const st = STATUS_MAP[p.status] || STATUS_MAP.pending
               return (
-                <div key={p._id} className="proj-card" style={{ background:'rgba(15,23,42,0.9)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:20,padding:24,transition:'border 0.2s',animation:`fadeUp 0.4s ease ${i*0.05}s both` }}>
-                  <div style={{ display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:12 }}>
-                    <div style={{ flex:1 }}>
-                      <div style={{ display:'flex',alignItems:'center',gap:10,marginBottom:6,flexWrap:'wrap' }}>
-                        <h3 style={{ fontFamily:'Syne,sans-serif',color:'#f1f5f9',fontSize:17,fontWeight:700,margin:0 }}>{p.title}</h3>
-                        <span style={{ background:st.bg,color:st.color,padding:'3px 12px',borderRadius:20,fontSize:12,fontWeight:600 }}>{st.label}</span>
+                <div 
+                  key={p._id} 
+                  className="bg-slate-900/40 backdrop-blur-md border border-white/[0.04] rounded-2xl p-6 transition-all duration-300 animate-fadeUp group
+                             hover:border-indigo-500/25 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-indigo-500/5"
+                  style={{ animationDelay: `${i * 0.05}s` }}
+                >
+                  <div className="flex justify-between items-start flex-wrap gap-4 mb-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2.5 mb-1.5 flex-wrap">
+                        <h3 className="font-syne text-slate-100 text-lg font-bold m-0 group-hover:text-indigo-400 transition-colors tracking-tight">
+                          {p.title}
+                        </h3>
+                        <span className={`px-2.5 py-0.5 border rounded-full text-[10px] font-extrabold uppercase tracking-wide ${st.theme}`}>
+                          {st.label}
+                        </span>
                       </div>
-                      <p style={{ color:'#64748b',fontSize:13,margin:0,lineHeight:1.5 }}>{p.description?.slice(0,120)}{p.description?.length>120?'...':''}</p>
+                      <p className="text-slate-400 text-sm font-medium leading-relaxed max-w-3xl m-0">
+                        {p.description?.slice(0, 120)}{p.description?.length > 120 ? '...' : ''}
+                      </p>
                     </div>
-                    {p.status==='pending' && (
-                      <div style={{ display:'flex',gap:8,marginLeft:16,flexShrink:0 }}>
-                        <button onClick={()=>handleApprove(p._id,'approved')} style={{ background:'rgba(16,185,129,0.12)',border:'1px solid rgba(16,185,129,0.25)',borderRadius:10,padding:'7px 14px',color:'#10b981',cursor:'pointer',fontSize:12,fontWeight:600 }}>✅ Approve</button>
-                        <button onClick={()=>setApproving(approving===p._id?null:p._id)} style={{ background:'rgba(239,68,68,0.1)',border:'1px solid rgba(239,68,68,0.2)',borderRadius:10,padding:'7px 14px',color:'#ef4444',cursor:'pointer',fontSize:12,fontWeight:600 }}>❌ Reject</button>
+
+                    {/* Action Engine Triggers for Evaluator */}
+                    {p.status === 'pending' && (
+                      <div className="flex gap-2 ml-4 flex-shrink-0">
+                        <button 
+                          onClick={() => handleApprove(p._id, 'approved')} 
+                          className="bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                        >
+                          ✅ Approve
+                        </button>
+                        <button 
+                          onClick={() => setApproving(approving === p._id ? null : p._id)} 
+                          className="bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                        >
+                          ❌ Reject
+                        </button>
                       </div>
                     )}
                   </div>
 
-                  {/* Reject with remarks */}
-                  {approving===p._id && (
-                    <div style={{ background:'rgba(239,68,68,0.05)',border:'1px solid rgba(239,68,68,0.15)',borderRadius:12,padding:14,marginBottom:12 }}>
-                      <input value={remarks} onChange={e=>setRemarks(e.target.value)} placeholder="Rejection reason likho..." className="custom-input" style={{ marginBottom:10 }} />
-                      <button onClick={()=>handleApprove(p._id,'rejected')} style={{ background:'rgba(239,68,68,0.15)',border:'1px solid rgba(239,68,68,0.3)',borderRadius:8,padding:'8px 20px',color:'#ef4444',cursor:'pointer',fontWeight:600,fontSize:13 }}>Confirm Reject</button>
+                  {/* Operational Exception: Input Rejection Log */}
+                  {approving === p._id && (
+                    <div className="bg-red-500/[0.03] border border-red-500/15 rounded-xl p-4 mb-4 animate-fadeUp">
+                      <input 
+                        value={remarks} 
+                        onChange={e => setRemarks(e.target.value)} 
+                        placeholder="Provide rejection reason parameters..." 
+                        className="w-full bg-white/[0.02] border border-white/5 focus:border-red-500/30 rounded-xl px-4 py-2.5 text-sm text-slate-200 placeholder-slate-600 font-medium outline-none transition-all mb-3" 
+                      />
+                      <button 
+                        onClick={() => handleApprove(p._id, 'rejected')} 
+                        className="bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-400 px-5 py-2 rounded-xl font-bold text-xs transition-all cursor-pointer"
+                      >
+                        Confirm Termination Sequence
+                      </button>
                     </div>
                   )}
 
-                  <div style={{ display:'flex',gap:16,flexWrap:'wrap' }}>
-                    <span style={{ color:'#475569',fontSize:12 }}>👤 {p.createdBy?.name||'Unknown'}</span>
-                    {p.category && <span style={{ color:'#475569',fontSize:12 }}>📂 {p.category}</span>}
-                    {p.deadline && <span style={{ color:'#475569',fontSize:12 }}>📅 {new Date(p.deadline).toLocaleDateString('en-IN')}</span>}
-                    {p.techStack?.length>0 && <span style={{ color:'#475569',fontSize:12 }}>🔧 {p.techStack.join(', ')}</span>}
-                    {p.grade && <span style={{ color:'#10b981',fontSize:12,fontWeight:700 }}>⭐ Grade: {p.grade}</span>}
+                  {/* Infrastructure Meta Segment Tag Assembly */}
+                  <div className="flex gap-x-4 gap-y-1.5 flex-wrap text-xs font-semibold text-slate-500 border-t border-white/[0.02] pt-3.5">
+                    <span className="flex items-center gap-1.5 text-slate-400">👤 {p.createdBy?.name || 'Unknown Log'}</span>
+                    {p.category && <span className="flex items-center gap-1.5">📂 {p.category}</span>}
+                    {p.deadline && <span className="flex items-center gap-1.5">📅 {new Date(p.deadline).toLocaleDateString('en-IN')}</span>}
+                    {p.techStack?.length > 0 && <span className="flex items-center gap-1.5 max-w-xs truncate">🔧 {p.techStack.join(', ')}</span>}
+                    {p.grade && <span className="flex items-center gap-1.5 bg-emerald-500/5 px-2 py-0.5 border border-emerald-500/10 text-emerald-400 font-bold rounded">⭐ Grade: {p.grade}</span>}
                   </div>
 
-                  {/* Progress */}
-                  <div style={{ marginTop:14 }}>
-                    <div style={{ display:'flex',justifyContent:'space-between',marginBottom:5 }}>
-                      <span style={{ color:'#334155',fontSize:11 }}>Progress</span>
-                      <span style={{ color:'#475569',fontSize:11 }}>{p.progress}%</span>
+                  {/* Metrics Velocity Assembly Bar */}
+                  <div className="mt-4 border-t border-white/[0.02] pt-3">
+                    <div className="flex justify-between items-center text-[10px] font-extrabold uppercase tracking-wider mb-1.5">
+                      <span className="text-slate-600">Pipeline Velocity</span>
+                      <span className="text-indigo-400 font-mono text-xs normal-case font-medium">{p.progress}%</span>
                     </div>
-                    <div style={{ background:'rgba(255,255,255,0.05)',borderRadius:99,height:4 }}>
-                      <div style={{ background:'linear-gradient(135deg,#6366f1,#22d3ee)',borderRadius:99,height:'100%',width:`${p.progress}%` }} />
+                    <div className="bg-white/[0.03] border border-white/5 rounded-full h-2 overflow-hidden p-[1px]">
+                      <div 
+                        className="bg-gradient-to-r from-indigo-500 to-cyan-400 h-full rounded-full transition-all duration-500" 
+                        style={{ width: `${p.progress}%` }} 
+                      />
                     </div>
                   </div>
+
                 </div>
               )
             })}

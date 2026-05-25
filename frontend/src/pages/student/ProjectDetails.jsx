@@ -5,10 +5,9 @@ import { useParams, useNavigate } from 'react-router-dom'
 import API from '../../api/axios'
 import toast from 'react-hot-toast'
 
-// Sub-components ko import karenge (Jo aapke folder mein pehle se hain)
+// Sub-components ko import karenge
 import KanbanBoard from './KanbanBoard'
 import MyTeam from './MyTeam'
-import TeamChat from './TeamChat'
 
 export default function ProjectDetails() {
   const { id } = useParams() // URL se project ID nikalne ke liye
@@ -63,26 +62,26 @@ export default function ProjectDetails() {
               <span className="bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest">
                 {project.category || 'General Project'}
               </span>
-              <h1 className="font-syne text-2xl font-extrabold text-white mt-3 tracking-tight">{project.title}</h1>
+              <h1 className="text-2xl font-extrabold text-white mt-3 tracking-tight">{project.title}</h1>
               <p className="text-slate-400 text-sm mt-2 max-w-2xl">{project.description || 'No description provided yet.'}</p>
             </div>
             
             {/* Faculty Bind Status */}
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4 min-w-[220px]">
-              <div className="text-slate-500 text-[9px] font-extrabold tracking-wider uppercase mb-1">Assigned Guide</div>
-              {project.teacher ? (
+              <div className="text-slate-500 text-[9px] font-extrabold tracking-wider uppercase mb-1">Subject Configuration</div>
+              {project.subject ? (
                 <div>
-                  <div className="text-emerald-400 font-bold text-sm">✅ {project.teacher.name}</div>
+                  <div className="text-emerald-400 font-bold text-sm">✅ Linked Course</div>
                   <div className="text-slate-400 text-xs mt-0.5">{project.subject?.name} ({project.subject?.code})</div>
                 </div>
               ) : (
                 <div>
-                  <div className="text-amber-400 font-bold text-xs flex items-center gap-1">⏳ No Teacher Assigned</div>
+                  <div className="text-amber-400 font-bold text-xs flex items-center gap-1">⏳ No Course Linked</div>
                   <button 
-                    onClick={() => navigate('/student/assign-teacher')} 
+                    onClick={() => navigate('/student/enroll-subject')} 
                     className="mt-2 text-[11px] font-bold text-indigo-400 hover:underline bg-transparent border-none cursor-pointer"
                   >
-                    Assign Teacher Now →
+                    Enroll in Subject Now →
                   </button>
                 </div>
               )}
@@ -105,7 +104,6 @@ export default function ProjectDetails() {
             { id: 'overview', label: 'Overview & Specs' },
             { id: 'kanban', label: 'Kanban Tasks' },
             { id: 'team', label: 'Team Configuration' },
-            { id: 'chat', label: 'Team Stream Chat' },
           ].map(tab => (
             <button
               key={tab.id}
@@ -125,11 +123,11 @@ export default function ProjectDetails() {
         {/* Dynamic Inner Panel View Router */}
         <div className="mt-4">
           {activeSubTab === 'overview' && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fadeUp">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Left Column: Repo Links */}
               <div className="md:col-span-2 space-y-6">
                 <div className="bg-[#0b1324]/60 border border-white/[0.05] rounded-2xl p-5">
-                  <h3 className="font-syne text-white text-sm font-bold uppercase tracking-wider mb-4">Project Assets & Handshakes</h3>
+                  <h3 className="text-white text-sm font-bold uppercase tracking-wider mb-4">Project Assets</h3>
                   <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 block mb-2">Repository Endpoint (GitHub)</label>
                   <input 
                     type="text" 
@@ -142,7 +140,7 @@ export default function ProjectDetails() {
 
               {/* Right Column: Metadata logs */}
               <div className="bg-[#0b1324]/60 border border-white/[0.05] rounded-2xl p-5 h-fit">
-                <h3 className="font-syne text-white text-sm font-bold uppercase tracking-wider mb-3">System Logs</h3>
+                <h3 className="text-white text-sm font-bold uppercase tracking-wider mb-3">System Logs</h3>
                 <div className="text-slate-500 text-xs space-y-2">
                   <div>Created: <span className="text-slate-400 font-mono">{new Date(project.createdAt).toLocaleDateString()}</span></div>
                   <div>Status: <span className="text-indigo-400 font-bold uppercase tracking-wider text-[10px]">{project.status || 'Active'}</span></div>
@@ -154,7 +152,6 @@ export default function ProjectDetails() {
           {/* Render target layout sub-modules based on layout tab state */}
           {activeSubTab === 'kanban' && <KanbanBoard projectId={id} />}
           {activeSubTab === 'team' && <MyTeam projectId={id} projectData={project} onUpdate={fetchProjectDetails} />}
-          {activeSubTab === 'chat' && <TeamChat projectId={id} />}
         </div>
 
       </div>
