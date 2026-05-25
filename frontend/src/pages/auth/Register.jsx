@@ -205,7 +205,7 @@ export default function Register() {
 
             </div>
 
-            <h1 className="text-5xl font-black leading-tight mt-8">
+            <h1 className="text-5xl font-bold leading-tight mt-8">
 
               Create Your
               <br />
@@ -281,7 +281,7 @@ export default function Register() {
 
           <div className="mb-8">
 
-            <h2 className="text-3xl md:text-4xl font-black">
+            <h2 className="text-3xl md:text-4xl font-bold">
 
               Register Account
 

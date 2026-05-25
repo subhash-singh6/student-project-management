@@ -145,7 +145,7 @@ export default function Login() {
 
             </div>
 
-            <h1 className="text-5xl font-black leading-tight mt-8">
+            <h1 className="text-5xl font-bold leading-tight mt-8">
 
               Welcome
               <br />
@@ -170,7 +170,7 @@ export default function Login() {
 
             <div className="flex items-center gap-5">
 
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-3xl font-black shadow-2xl shadow-amber-500/20">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-3xl font-bold shadow-2xl shadow-amber-500/20">
 
                 SP
 
@@ -216,7 +216,7 @@ export default function Login() {
 
             <div className="mb-10">
 
-              <h2 className="text-3xl md:text-4xl font-black">
+              <h2 className="text-3xl md:text-4xl font-bold">
 
                 Login To Continue
 
