@@ -31,4 +31,4 @@ export const navigation = {
   ]
 };
 
-export const getNavForRole = (role) => navigation[role] || [];ha 
+export const getNavForRole = (role) => navigation[role] || [];
