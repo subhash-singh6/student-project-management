@@ -2,62 +2,32 @@ const mongoose = require("mongoose");
 
 const projectSchema = new mongoose.Schema(
   {
-    title: {
+    title: { type: String, required: [true, "Project title zaroori hai"], trim: true },
+    description: { type: String, required: [true, "Description zaroori hai"] },
+    category: {
       type: String,
-      required: [true, "Project title zaroori hai"],
-      trim: true,
-    },
-    description: {
-      type: String,
-      required: [true, "Description zaroori hai"],
+      enum: ["Web Development", "Mobile App", "ML/AI", "IoT", "Cybersecurity", "Other"],
+      default: "Other",
     },
     status: {
       type: String,
       enum: ["pending", "approved", "in-progress", "completed", "rejected"],
       default: "pending",
     },
-    category: {
-      type: String,
-      enum: ["Web Development", "Mobile App", "ML/AI", "IoT", "Cybersecurity", "Other"],
-      default: "Other",
-    },
-
+    
     // Relations
-    createdBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    team: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Team",
-    },
-    // ✅ Mentor field completely removed
-    teacher: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
-    // ✅ College grading valid karne ke liye Subject schema link kar diya hai
-    subject: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Subject",
-      required: [true, "Project kis subject ka hai ye batana zaroori hai"],
-    },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    team: { type: mongoose.Schema.Types.ObjectId, ref: "Team", default: null },
+    teacher: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+    subject: { type: mongoose.Schema.Types.ObjectId, ref: "Subject", default: null },
 
-    // Progress
-    progress: {
-      type: Number,
-      default: 0,
-      min: 0,
-      max: 100,
-    },
+    // Tracking
+    progress: { type: Number, default: 0, min: 0, max: 100 },
+    startDate: Date,
+    deadline: Date,
+    completedAt: Date,
 
-    // Dates
-    startDate:  { type: Date },
-    deadline:   { type: Date },
-    completedAt:{ type: Date },
-
-    // Teacher grade
+    // Grading
     grade: {
       type: String,
       enum: ["A+", "A", "B+", "B", "C", "D", "F", ""],
@@ -65,8 +35,18 @@ const projectSchema = new mongoose.Schema(
     },
     gradeRemarks: { type: String, default: "" },
 
-    // Tags
-    techStack: { type: [String] },
+    // Tech & Links
+    techStack: [String],
+    githubRepo: { type: String, default: "" },
+    liveDemo: { type: String, default: "" },
+
+    // Attachments
+    attachments: [{
+      fileName: { type: String, required: true },
+      fileUrl: { type: String, required: true },
+      fileType: { type: String, default: "" },
+      uploadedAt: { type: Date, default: Date.now },
+    }],
 
     isActive: { type: Boolean, default: true },
   },

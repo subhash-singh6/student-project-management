@@ -1,275 +1,114 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../../layouts/DashboardLayout";
+import API from "../../api/axios";
+import toast from "react-hot-toast";
+import { FiFolder, FiClock, FiUsers, FiCheckCircle, FiLogOut, FiArrowRight, FiLayout, FiMessageSquare, FiBookOpen } from "react-icons/fi";
 
 export default function StudentDashboard() {
+  const navigate = useNavigate();
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({ totalProjects: 0, completedProjects: 0, pendingProjects: 0, totalTeams: 0 });
+
+  useEffect(() => { fetchDashboardData(); }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      const res = await API.get("/projects");
+      const data = res.data.projects || [];
+      setProjects(data);
+      setStats({
+        totalProjects: data.length,
+        completedProjects: data.filter((p) => p.status === "completed").length,
+        pendingProjects: data.filter((p) => p.status !== "completed").length,
+        totalTeams: new Set(data.filter((p) => p.team?._id).map((p) => p.team._id)).size,
+      });
+    } catch (error) {
+      toast.error("Failed to load dashboard");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/login");
+    toast.success("Logged out successfully");
+  };
 
   return (
-
-    <DashboardLayout
-      title="Student Dashboard"
-      subtitle="Manage your academic projects"
-      accent="#14b8a6"
-      portalLabel="Student Hub"
-    >
-
-      <div className="space-y-8">
-
-        {/* Hero Section */}
-
-        <div className="bg-gradient-to-br from-teal-500/10 to-cyan-500/5 border border-teal-500/10 rounded-3xl p-8 relative overflow-hidden">
-
-          <div className="absolute top-0 right-0 w-72 h-72 bg-teal-500/10 blur-3xl rounded-full" />
-
-          <div className="relative z-10">
-
-            <div className="inline-flex items-center gap-2 bg-teal-500/10 border border-teal-500/20 rounded-full px-4 py-2 mb-6">
-
-              <div className="w-2 h-2 rounded-full bg-teal-400 animate-pulse" />
-
-              <span className="text-xs font-light tracking-widest uppercase text-teal-300">
-
-                Student Workspace
-
-              </span>
-
-            </div>
-
-            <h1 className="text-4xl font-light leading-tight">
-
-              Welcome Back 👋
-
-            </h1>
-
-            <p className="text-slate-400 mt-4 max-w-2xl font-thin">
-
-              Track your academic projects, collaborate with teammates,
-              manage submissions and stay productive.
-
-            </p>
-
+    <DashboardLayout title="Student Dashboard" portalLabel="Student Hub" accent="#6366f1">
+      <div className="space-y-6">
+        
+        {/* HEADER WITH LOGOUT */}
+        <div className="flex justify-between items-center bg-white/[0.03] border border-white/10 rounded-2xl p-6">
+          <div>
+            <h1 className="text-2xl font-bold text-white">Student Workspace</h1>
+            <p className="text-slate-400 text-sm">Manage your academic journey effectively</p>
           </div>
-
+          {/* <button 
+            onClick={handleLogout}
+            className="flex items-center gap-2 px-4 py-2 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl hover:bg-red-500/20 transition text-sm font-medium"
+          >
+            <FiLogOut /> Logout
+          </button> */}
         </div>
 
-        {/* Stats */}
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
-
+        {/* STATS */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {[
-            {
-              title: "My Projects",
-              value: "08",
-              color: "text-teal-400",
-              bg: "from-teal-500/10 to-cyan-500/5",
-              icon: "📁",
-            },
-
-            {
-              title: "Pending Tasks",
-              value: "14",
-              color: "text-amber-400",
-              bg: "from-amber-500/10 to-orange-500/5",
-              icon: "⏳",
-            },
-
-            {
-              title: "Team Members",
-              value: "26",
-              color: "text-indigo-400",
-              bg: "from-indigo-500/10 to-cyan-500/5",
-              icon: "👥",
-            },
-
-            {
-              title: "Completed",
-              value: "12",
-              color: "text-emerald-400",
-              bg: "from-emerald-500/10 to-green-500/5",
-              icon: "✅",
-            },
-
-          ].map((card) => (
-
-            <div
-              key={card.title}
-              className={`bg-gradient-to-br ${card.bg} border border-white/5 rounded-3xl p-6 hover:border-white/10 transition-all duration-300`}
-            >
-
-              <div className="text-3xl mb-4">
-
-                {card.icon}
-
-              </div>
-
-              <div className={`text-4xl font-black ${card.color}`}>
-
-                {card.value}
-
-              </div>
-
-              <div className="text-sm text-slate-400 mt-2">
-
-                {card.title}
-
-              </div>
-
+            { title: "Projects", value: stats.totalProjects, icon: <FiFolder /> },
+            { title: "Pending", value: stats.pendingProjects, icon: <FiClock /> },
+            { title: "Teams", value: stats.totalTeams, icon: <FiUsers /> },
+            { title: "Completed", value: stats.completedProjects, icon: <FiCheckCircle /> },
+          ].map((card, i) => (
+            <div key={i} className="bg-white/[0.03] border border-white/10 rounded-2xl p-5 hover:border-indigo-500/30 transition">
+              <div className="text-indigo-400 text-xl mb-3">{card.icon}</div>
+              <div className="text-3xl font-bold text-white">{loading ? "--" : card.value}</div>
+              <div className="text-xs text-slate-500 uppercase tracking-wider font-semibold">{card.title}</div>
             </div>
-
           ))}
-
         </div>
 
-        {/* Main Grid */}
-
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-
-          {/* Projects */}
-
-          <div className="xl:col-span-2 bg-white/[0.03] border border-white/5 rounded-3xl overflow-hidden">
-
-            <div className="px-6 py-5 border-b border-white/5 flex items-center justify-between">
-
-              <div>
-
-                <h2 className="text-2xl font-bold">
-
-                  Active Projects
-
-                </h2>
-
-                <p className="text-sm text-slate-500 mt-1">
-
-                  Recent activity and updates
-
-                </p>
-
-              </div>
-
+        {/* MAIN GRID */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          
+          {/* PROJECTS */}
+          <div className="xl:col-span-2 bg-white/[0.03] border border-white/10 rounded-2xl overflow-hidden">
+            <div className="px-6 py-4 border-b border-white/10 flex justify-between items-center">
+              <h2 className="font-bold text-white">Active Projects</h2>
+              <button onClick={() => navigate("/student/projects")} className="text-xs text-indigo-400 font-semibold hover:underline">View All</button>
             </div>
-
-            <div className="p-6 space-y-4">
-
-              {[1,2,3].map((p) => (
-
-                <div
-                  key={p}
-                  className="bg-white/[0.03] border border-white/5 rounded-2xl p-5 hover:border-teal-500/20 transition-all"
-                >
-
-                  <div className="flex items-center justify-between">
-
-                    <div>
-
-                      <h3 className="text-lg font-bold">
-
-                        AI Based Attendance System
-
-                      </h3>
-
-                      <p className="text-sm text-slate-500 mt-2">
-
-                        Team collaboration project
-
-                      </p>
-
-                    </div>
-
-                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-teal-500/10 border border-teal-500/20 text-teal-400">
-
-                      ACTIVE
-
-                    </span>
-
-                  </div>
-
+            <div className="divide-y divide-white/5">
+              {projects.slice(0, 5).map((p) => (
+                <div key={p._id} onClick={() => navigate(`/student/project/${p._id}`)} className="flex items-center justify-between p-4 hover:bg-white/[0.03] cursor-pointer group">
+                  <span className="text-sm text-slate-300 font-medium">{p.title}</span>
+                  <FiArrowRight className="text-slate-600 group-hover:text-indigo-400" />
                 </div>
-
               ))}
-
             </div>
-
           </div>
 
-          {/* Quick Actions */}
-
-          <div className="space-y-6">
-
-            <div className="bg-white/[0.03] border border-white/5 rounded-3xl p-6">
-
-              <h2 className="text-xl font-bold mb-5">
-
-                Quick Actions
-
-              </h2>
-
-              <div className="grid grid-cols-2 gap-4">
-
-                {[
-                  "📁 Projects",
-                  "🧠 Kanban",
-                  "👥 Team",
-                  "📚 Subjects",
-                ].map((a) => (
-
-                  <button
-                    key={a}
-                    className="bg-white/[0.03] border border-white/5 rounded-2xl py-5 hover:bg-white/[0.05] hover:border-teal-500/20 transition-all text-sm font-semibold"
-                  >
-
-                    {a}
-
-                  </button>
-
-                ))}
-
-              </div>
-
+          {/* QUICK ACTIONS */}
+          <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-6">
+            <h2 className="font-bold text-white mb-4">Quick Actions</h2>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { name: "Projects", icon: <FiFolder />, path: "/student/projects" },
+                { name: "Kanban", icon: <FiLayout />, path: "/student/kanban" },
+                { name: "Team", icon: <FiUsers />, path: "/student/team" },
+                { name: "Subjects", icon: <FiBookOpen />, path: "/student/enroll-subject" },
+              ].map((a, i) => (
+                <button key={i} onClick={() => navigate(a.path)} className="flex flex-col items-center justify-center p-4 bg-white/[0.03] border border-white/5 rounded-xl hover:border-indigo-500/30 transition text-slate-300 text-xs font-semibold gap-2">
+                  <div className="text-lg text-indigo-400">{a.icon}</div>
+                  {a.name}
+                </button>
+              ))}
             </div>
-
-            <div className="bg-white/[0.03] border border-white/5 rounded-3xl p-6">
-
-              <h2 className="text-xl font-bold mb-5">
-
-                Notifications
-
-              </h2>
-
-              <div className="space-y-4">
-
-                {[1,2,3].map((n) => (
-
-                  <div
-                    key={n}
-                    className="bg-white/[0.03] border border-white/5 rounded-2xl p-4"
-                  >
-
-                    <div className="text-sm font-semibold">
-
-                      Project deadline approaching
-
-                    </div>
-
-                    <div className="text-xs text-slate-500 mt-2">
-
-                      2 hours ago
-
-                    </div>
-
-                  </div>
-
-                ))}
-
-              </div>
-
-            </div>
-
           </div>
-
         </div>
-
       </div>
-
     </DashboardLayout>
-
   );
-
 }

@@ -1,48 +1,34 @@
-// constants/navigation.js
+import {
+  FiHome, FiFolder, FiColumns, FiUsers, FiMessageSquare,
+  FiBook, FiAward, FiUser, FiEdit3, FiSettings,
+  FiBarChart2, FiShield
+} from "react-icons/fi";
 
-// Common links for all roles
-const COMMON_NAV = [
-  { path: '/analytics', label: 'Analytics', icon: '📊' },
-  { path: '/leaderboard', label: 'Leaderboard', icon: '🏆' },
-  { path: '/profile', label: 'Profile', icon: '👤' },
-];
+export const navigation = {
+  student: [
+    { label: "Dashboard", path: "/student/dashboard", icon: FiHome },
+    { label: "My Projects", path: "/student/projects", icon: FiFolder },
+    { label: "Kanban Board", path: "/student/kanban", icon: FiColumns },
+    { label: "My Team", path: "/student/team", icon: FiUsers },
+    { label: "Team Chat", path: "/student/team-chat", icon: FiMessageSquare },
+    { label: "Enroll Subject", path: "/student/enroll-subject", icon: FiBook },
+    { label: "Leaderboard", path: "/leaderboard", icon: FiAward },
+    { label: "Profile", path: "/profile", icon: FiUser },
+  ],
 
-export const STUDENT_NAV = [
-  { path: '/student/dashboard', label: 'Dashboard', icon: '🏠' },
-  { path: '/student/projects', label: 'My Projects', icon: '📁' },
-  { path: '/student/team', label: 'My Team', icon: '👥' },
-  { path: '/student/chat', label: 'Team Chat', icon: '💬' },
-  { path: '/student/kanban', label: 'Kanban', icon: '📋' },
-  { path: '/student/assign-teacher', label: 'Assign Reviewer', icon: '🎓' },
-  ...COMMON_NAV
-];
+  teacher: [
+    { label: "Dashboard", path: "/teacher/dashboard", icon: FiHome },
+    { label: "My Classes", path: "/teacher/classes", icon: FiFolder },
+    { label: "Students", path: "/teacher/students", icon: FiUsers },
+    { label: "Assignments", path: "/teacher/assignments", icon: FiEdit3 },
+    { label: "Grades", path: "/teacher/grades", icon: FiBarChart2 },
+  ],
 
-export const TEACHER_NAV = [
-  { path: '/teacher/dashboard', label: 'Dashboard', icon: '🏠' },
-  { path: '/teacher/projects', label: 'Review Projects', icon: '📁' },
-  { path: '/teacher/grades', label: 'Grades & Feedback', icon: '⭐' },
-  { path: '/teacher/subjects', label: 'Subjects', icon: '📚' },
-  { path: '/teacher/admin', label: 'System Admin', icon: '⚙️' },
-  ...COMMON_NAV
-];
-
-export const ADMIN_NAV = [
-  { path: '/admin/dashboard', label: 'Admin Panel', icon: '⚡' },
-  { path: '/admin/users', label: 'Manage Users', icon: '👥' },
-  { path: '/admin/projects', label: 'All Projects', icon: '📁' },
-  { path: '/admin/logs', label: 'System Logs', icon: '📜' },
-  ...COMMON_NAV
-];
-
-export const getNavForRole = (role) => {
-  if (role === 'student') return STUDENT_NAV;
-  if (role === 'teacher') return TEACHER_NAV;
-  if (role === 'admin') return ADMIN_NAV;
-  return [];
+  admin: [
+    { label: "Dashboard", path: "/admin/dashboard", icon: FiHome },
+    { label: "Users", path: "/admin/users", icon: FiUsers },
+    { label: "Settings", path: "/admin/settings", icon: FiSettings },
+  ]
 };
 
-export const ROLE_HOME = {
-  student: '/student/dashboard',
-  teacher: '/teacher/dashboard',
-  admin: '/admin/dashboard',
-};
+export const getNavForRole = (role) => navigation[role] || [];ha 

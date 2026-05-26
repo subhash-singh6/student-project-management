@@ -1,160 +1,150 @@
 // frontend/src/pages/student/ProjectDetails.jsx
 
-import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import API from '../../api/axios'
-import toast from 'react-hot-toast'
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { 
+  ArrowLeft, Layout, KanbanSquare, Users, 
+  Code2, GitBranch, Info, CalendarDays, ExternalLink 
+} from "lucide-react";
+import DashboardLayout from "../../layouts/DashboardLayout";
+import API from "../../api/axios";
+import toast from "react-hot-toast";
 
-// Sub-components ko import karenge
-import KanbanBoard from './KanbanBoard'
-import MyTeam from './MyTeam'
+import KanbanBoard from "./KanbanBoard";
+import MyTeam from "./MyTeam";
 
 export default function ProjectDetails() {
-  const { id } = useParams() // URL se project ID nikalne ke liye
-  const navigate = useNavigate()
-
-  const [project, setProject] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [activeSubTab, setActiveSubTab] = useState('overview')
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [project, setProject] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [activeSubTab, setActiveSubTab] = useState("overview");
 
   useEffect(() => {
-    fetchProjectDetails()
-  }, [id])
+    fetchProjectDetails();
+  }, [id]);
 
   const fetchProjectDetails = async () => {
     try {
-      const res = await API.get(`/projects/${id}`)
-      setProject(res.data.project)
+      const res = await API.get(`/projects/${id}`);
+      setProject(res.data.project);
     } catch (err) {
-      toast.error('Project details load nahi hui!')
-      navigate('/student/dashboard')
+      console.log(err);
+      toast.error("Failed to load project details");
+      navigate("/student/dashboard");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#060A12] flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin" />
+      </div>
+    );
   }
 
-  if (loading) return (
-    <div className="min-h-screen bg-[#070b14] flex items-center justify-center">
-      <div className="w-10 h-10 border-3 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin" />
-    </div>
-  )
+  if (!project) {
+    return <div className="min-h-screen bg-[#060A12] flex items-center justify-center text-slate-400">Project not found.</div>;
+  }
 
-  if (!project) return <div className="text-white text-center py-20">Project nahi mila!</div>
+  const tabs = [
+    { id: "overview", label: "Overview", icon: <Info size={16} /> },
+    { id: "kanban", label: "Kanban Tasks", icon: <KanbanSquare size={16} /> },
+    { id: "team", label: "Team", icon: <Users size={16} /> },
+  ];
 
   return (
-    <div className="min-h-screen bg-[#070b14] text-slate-300 font-sans">
-      <div className="max-w-6xl mx-auto px-6 py-8">
-        
-        {/* Header Navigation */}
-        <div className="mb-6">
-          <button 
-            onClick={() => navigate('/student/dashboard')} 
-            className="text-slate-500 hover:text-indigo-400 text-xs font-bold uppercase tracking-wider bg-transparent border-none cursor-pointer transition-colors"
-          >
-            ← Back to Dashboard
+    <DashboardLayout title="Project Details" subtitle="Manage your complete project workspace" accent="#6366f1" portalLabel="Student Hub">
+      <div className="space-y-8 text-slate-300">
+        <div>
+          <button onClick={() => navigate("/student/dashboard")} className="flex items-center gap-2 text-slate-500 hover:text-indigo-400 text-xs font-bold uppercase tracking-wider transition-all">
+            <ArrowLeft size={14} /> Back to Dashboard
           </button>
         </div>
 
-        {/* Project Meta Card */}
-        <div className="bg-[#0b1324]/60 backdrop-blur-md border border-white/[0.05] rounded-2xl p-6 mb-8 shadow-xl">
-          <div className="flex flex-wrap justify-between items-start gap-4">
-            <div>
-              <span className="bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest">
-                {project.category || 'General Project'}
-              </span>
-              <h1 className="text-2xl font-extrabold text-white mt-3 tracking-tight">{project.title}</h1>
-              <p className="text-slate-400 text-sm mt-2 max-w-2xl">{project.description || 'No description provided yet.'}</p>
+        <div className="bg-white/[0.03] border border-white/10 rounded-3xl p-8 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-72 h-72 bg-indigo-500/10 blur-3xl rounded-full" />
+          <div className="relative z-10">
+            <div className="inline-flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 px-4 py-2 rounded-full text-xs font-bold tracking-widest uppercase">
+              <div className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
+              {project.category || "General Project"}
             </div>
-            
-            {/* Faculty Bind Status */}
-            <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4 min-w-[220px]">
-              <div className="text-slate-500 text-[9px] font-extrabold tracking-wider uppercase mb-1">Subject Configuration</div>
-              {project.subject ? (
-                <div>
-                  <div className="text-emerald-400 font-bold text-sm">✅ Linked Course</div>
-                  <div className="text-slate-400 text-xs mt-0.5">{project.subject?.name} ({project.subject?.code})</div>
-                </div>
-              ) : (
-                <div>
-                  <div className="text-amber-400 font-bold text-xs flex items-center gap-1">⏳ No Course Linked</div>
-                  <button 
-                    onClick={() => navigate('/student/enroll-subject')} 
-                    className="mt-2 text-[11px] font-bold text-indigo-400 hover:underline bg-transparent border-none cursor-pointer"
-                  >
-                    Enroll in Subject Now →
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Tech Stack Badge Cluster */}
-          <div className="mt-4 flex flex-wrap gap-2 pt-4 border-t border-white/[0.04]">
-            {project.techStack?.map((tech, index) => (
-              <span key={index} className="bg-[#070b14] border border-white/5 font-mono text-slate-400 px-2.5 py-1 rounded-md text-xs">
-                {tech}
-              </span>
-            ))}
+            <h1 className="text-4xl font-black text-white mt-6 leading-tight">{project.title}</h1>
+            <p className="text-slate-400 mt-5 max-w-3xl leading-relaxed">{project.description || "No description available."}</p>
           </div>
         </div>
 
-        {/* Sub-Navigation Interface Hub */}
-        <div className="flex border-b border-white/[0.06] mb-6 gap-6">
-          {[
-            { id: 'overview', label: 'Overview & Specs' },
-            { id: 'kanban', label: 'Kanban Tasks' },
-            { id: 'team', label: 'Team Configuration' },
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveSubTab(tab.id)}
-              className={`pb-3 font-bold text-xs uppercase tracking-wider bg-transparent border-none cursor-pointer transition-all relative ${
-                activeSubTab === tab.id ? 'text-indigo-400 font-extrabold' : 'text-slate-500 hover:text-slate-400'
-              }`}
-            >
-              {tab.label}
-              {activeSubTab === tab.id && (
-                <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-indigo-500 rounded-full animate-fadeIn" />
-              )}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="bg-white/[0.03] border border-white/10 rounded-3xl p-6">
+            <div className="text-xs uppercase tracking-widest text-slate-500 font-bold mb-4">Linked Subject</div>
+            {project.subject ? (
+              <div>
+                <div className="text-indigo-400 font-bold text-lg">{project.subject?.name}</div>
+                <div className="text-slate-500 text-sm mt-1">{project.subject?.code}</div>
+              </div>
+            ) : (
+              <button onClick={() => navigate("/student/enroll-subject")} className="text-indigo-300 text-sm font-semibold hover:text-indigo-200 transition">
+                Enroll Subject +
+              </button>
+            )}
+          </div>
+
+          <div className="bg-white/[0.03] border border-white/10 rounded-3xl p-6">
+            <div className="text-xs uppercase tracking-widest text-slate-500 font-bold mb-4">Project Status</div>
+            <div className="inline-flex px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-sm font-bold uppercase">
+              {project.status || "Active"}
+            </div>
+            <div className="text-slate-500 text-sm mt-5 flex items-center gap-2">
+              <CalendarDays size={14} /> {new Date(project.createdAt).toLocaleDateString()}
+            </div>
+          </div>
+
+          <div className="bg-white/[0.03] border border-white/10 rounded-3xl p-6">
+            <div className="text-xs uppercase tracking-widest text-slate-500 font-bold mb-4">Git Repository</div>
+            <div className="flex items-center gap-2 bg-[#060A12] border border-white/10 rounded-2xl px-4 py-3">
+              <GitBranch size={16} className="text-slate-600" />
+              <input type="text" readOnly value={project.gitRepo || "No repo linked"} className="w-full bg-transparent text-slate-400 text-sm outline-none" />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white/[0.03] border border-white/10 rounded-3xl p-6">
+          <h2 className="text-xl font-bold text-white mb-5 flex items-center gap-2"><Code2 size={20} className="text-indigo-400" /> Tech Stack</h2>
+          <div className="flex flex-wrap gap-3">
+            {project.techStack?.length > 0 ? (
+              project.techStack.map((tech, i) => (
+                <span key={i} className="bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 px-4 py-2 rounded-xl text-sm font-medium">
+                  {tech}
+                </span>
+              ))
+            ) : (
+              <span className="text-slate-500 text-sm">No technologies added.</span>
+            )}
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-6 border-b border-white/10 pb-1">
+          {tabs.map((tab) => (
+            <button key={tab.id} onClick={() => setActiveSubTab(tab.id)} className={`flex items-center gap-2 pb-4 text-sm font-bold uppercase tracking-wider transition-all ${activeSubTab === tab.id ? "text-indigo-400" : "text-slate-500 hover:text-slate-300"}`}>
+              {tab.icon} {tab.label}
+              {activeSubTab === tab.id && <div className="absolute -bottom-[2px] h-[2px] w-20 bg-indigo-500 rounded-full" />}
             </button>
           ))}
         </div>
 
-        {/* Dynamic Inner Panel View Router */}
-        <div className="mt-4">
-          {activeSubTab === 'overview' && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Left Column: Repo Links */}
-              <div className="md:col-span-2 space-y-6">
-                <div className="bg-[#0b1324]/60 border border-white/[0.05] rounded-2xl p-5">
-                  <h3 className="text-white text-sm font-bold uppercase tracking-wider mb-4">Project Assets</h3>
-                  <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 block mb-2">Repository Endpoint (GitHub)</label>
-                  <input 
-                    type="text" 
-                    readOnly 
-                    value={project.gitRepo || 'No repository linked.'} 
-                    className="w-full bg-[#070b14]/90 border border-white/10 text-slate-400 font-mono text-xs rounded-xl px-4 py-3 outline-none"
-                  />
-                </div>
-              </div>
-
-              {/* Right Column: Metadata logs */}
-              <div className="bg-[#0b1324]/60 border border-white/[0.05] rounded-2xl p-5 h-fit">
-                <h3 className="text-white text-sm font-bold uppercase tracking-wider mb-3">System Logs</h3>
-                <div className="text-slate-500 text-xs space-y-2">
-                  <div>Created: <span className="text-slate-400 font-mono">{new Date(project.createdAt).toLocaleDateString()}</span></div>
-                  <div>Status: <span className="text-indigo-400 font-bold uppercase tracking-wider text-[10px]">{project.status || 'Active'}</span></div>
-                </div>
-              </div>
+        <div>
+          {activeSubTab === "overview" && (
+            <div className="bg-white/[0.03] border border-white/10 rounded-3xl p-8">
+              <h2 className="text-2xl font-bold text-white mb-5">Project Overview</h2>
+              <p className="text-slate-400 leading-relaxed">{project.description || "No overview available."}</p>
             </div>
           )}
-
-          {/* Render target layout sub-modules based on layout tab state */}
-          {activeSubTab === 'kanban' && <KanbanBoard projectId={id} />}
-          {activeSubTab === 'team' && <MyTeam projectId={id} projectData={project} onUpdate={fetchProjectDetails} />}
+          {activeSubTab === "kanban" && <KanbanBoard projectId={id} />}
+          {activeSubTab === "team" && <MyTeam projectId={id} projectData={project} onUpdate={fetchProjectDetails} />}
         </div>
-
       </div>
-    </div>
-  )
+    </DashboardLayout>
+  );
 }

@@ -1,59 +1,223 @@
 const mongoose = require("mongoose");
+
 const bcrypt = require("bcryptjs");
 
-const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, "Name is required"],
-    trim: true,
+const userSchema = new mongoose.Schema(
+
+  {
+
+    /* ====================================== */
+    /* BASIC INFO */
+    /* ====================================== */
+
+    name: {
+
+      type: String,
+
+      required: [true, "Name is required"],
+
+      trim: true,
+
+    },
+
+    email: {
+
+      type: String,
+
+      required: [true, "Email is required"],
+
+      unique: true,
+
+      lowercase: true,
+
+      trim: true,
+
+    },
+
+    password: {
+
+      type: String,
+
+      required: [true, "Password is required"],
+
+      minlength: 6,
+
+      select: false,
+
+    },
+
+    role: {
+
+      type: String,
+
+      enum: [
+
+        "student",
+
+        "teacher",
+
+        "admin",
+
+      ],
+
+      default: "student",
+
+    },
+
+    /* ====================================== */
+    /* STUDENT FIELDS */
+    /* ====================================== */
+
+    enrollmentNumber: {
+
+      type: String,
+
+      default: "",
+
+      trim: true,
+
+    },
+
+    semester: {
+
+      type: Number,
+
+      default: null,
+
+    },
+
+    branch: {
+
+      type: String,
+
+      default: "",
+
+      trim: true,
+
+    },
+
+    /* ====================================== */
+    /* TEACHER FIELDS */
+    /* ====================================== */
+
+    employeeId: {
+
+      type: String,
+
+      default: "",
+
+      trim: true,
+
+    },
+
+    department: {
+
+      type: String,
+
+      default: "",
+
+      trim: true,
+
+    },
+
+    subjects: {
+
+      type: [String],
+
+      default: [],
+
+    },
+
+    /* ====================================== */
+    /* EXTRA */
+    /* ====================================== */
+
+    avatar: {
+
+      type: String,
+
+      default: "",
+
+    },
+
+    isActive: {
+
+      type: Boolean,
+
+      default: true,
+
+    },
+
+    lastLogin: {
+
+      type: Date,
+
+    },
+
   },
 
-  email: {
-    type: String,
-    required: [true, "Email is required"],
-    unique: true,
-    lowercase: true,
-  },
+  {
 
-  password: {
-    type: String,
-    required: [true, "Password is required"],
-    minlength: 6,
-    select: false,
-  },
+    timestamps: true,
 
-  role: {
-    type: String,
-    enum: ["student", "teacher", "admin"],
-    default: "student",
-  },
+  }
 
-  enrollmentNumber: String,
-  semester: Number,
-  branch: String,
-  employeeId: String,
-  department: String,
-  subjects: [String],
+);
 
-  isActive: {
-    type: Boolean,
-    default: true,
-  },
+/* ====================================== */
+/* HASH PASSWORD */
+/* ====================================== */
 
-  lastLogin: Date,
+userSchema.pre(
 
-}, { timestamps: true });
+  "save",
 
-userSchema.pre("save", async function () {
+  async function () {
 
-  if (!this.isModified("password")) return;
+    if (
 
-  this.password = await bcrypt.hash(this.password, 12);
+      !this.isModified(
+        "password"
+      )
 
-});
+    )
 
-userSchema.methods.comparePassword = async function (enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.password);
-};
+      return;
 
-module.exports = mongoose.model("User", userSchema);
+    this.password =
+      await bcrypt.hash(
+
+        this.password,
+
+        12
+
+      );
+
+  }
+
+);
+
+/* ====================================== */
+/* COMPARE PASSWORD */
+/* ====================================== */
+
+userSchema.methods.comparePassword =
+  async function (
+    enteredPassword
+  ) {
+
+    return await bcrypt.compare(
+
+      enteredPassword,
+
+      this.password
+
+    );
+
+  };
+
+module.exports =
+  mongoose.model(
+    "User",
+    userSchema
+  );

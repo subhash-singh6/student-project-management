@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../constants/context/AuthContext";
 import API from "../../api/axios";
 import toast from "react-hot-toast";
+import DashboardLayout from "../../layouts/DashboardLayout";
 
 import {
   Chart as ChartJS,
@@ -113,11 +114,11 @@ export default function Analytics() {
       return "/student/dashboard";
     }
 
-    if (user?.role === "mentor") {
-      return "/mentor/dashboard";
+    if (user?.role === "teacher") {
+      return "/teacher/dashboard";
     }
 
-    return "/teacher/dashboard";
+    return "/admin/dashboard";
 
   };
 
@@ -165,8 +166,8 @@ export default function Analytics() {
 
   projects.forEach((p) => {
 
-    subjectCount[p.subject || "Other"] =
-      (subjectCount[p.subject || "Other"] || 0) + 1;
+    subjectCount[p.subject?.name || "Other"] =
+      (subjectCount[p.subject?.name || "Other"] || 0) + 1;
 
   });
 
@@ -315,7 +316,8 @@ export default function Analytics() {
 
   return (
 
-    <div className="min-h-screen bg-[#070b14] text-white p-4 md:p-8">
+    // <div className="min-h-screen bg-[#070b14] text-white p-4 md:p-8">
+    <DashboardLayout title="Analytics Dashboard" subtitle="Project performance & governance insights" portalLabel="Analytics Center">
 
       {/* Header */}
 
@@ -513,7 +515,7 @@ export default function Analytics() {
 
       </div>
 
-    </div>
+    </DashboardLayout>
 
   );
 

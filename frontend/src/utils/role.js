@@ -1,3 +1,21 @@
-import { ROLE_HOME } from "../constants/navigation";
+// frontend/src/utils/role.js
 
-export const getDashboardPath = (role) => ROLE_HOME[role] || "/login";
+export const getDashboardPath = (role) => {
+
+  switch (role) {
+
+    case "student":
+      return "/student/dashboard";
+
+    case "teacher":
+      return "/teacher/dashboard";
+
+    case "admin":
+      return "/admin/dashboard";
+
+    default:
+      return "/login";
+
+  }
+
+};

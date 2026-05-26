@@ -1,21 +1,19 @@
-// frontend/src/services/taskService.js
+// frontend/src/services/notificationService.js
 
 import API from "../api/axios";
 
-export const taskService = {
+export const notificationService = {
 
   /* ====================================== */
-  /* GET TASKS BY PROJECT */
+  /* GET ALL NOTIFICATIONS */
   /* ====================================== */
 
-  getByProject: async (projectId) => {
+  getAll: async () => {
 
     try {
 
       const res = await API.get(
-
-        `/tasks/project/${projectId}`
-
+        "/notifications"
       );
 
       return res.data;
@@ -23,7 +21,7 @@ export const taskService = {
     } catch (error) {
 
       console.error(
-        "Get Tasks Error:",
+        "Get Notifications Error:",
         error
       );
 
@@ -34,49 +32,16 @@ export const taskService = {
   },
 
   /* ====================================== */
-  /* CREATE TASK */
+  /* MARK AS READ */
   /* ====================================== */
 
-  create: async (data) => {
-
-    try {
-
-      const res = await API.post(
-
-        "/tasks",
-
-        data
-
-      );
-
-      return res.data;
-
-    } catch (error) {
-
-      console.error(
-        "Create Task Error:",
-        error
-      );
-
-      throw error;
-
-    }
-
-  },
-
-  /* ====================================== */
-  /* UPDATE TASK */
-  /* ====================================== */
-
-  update: async (id, data) => {
+  markAsRead: async (id) => {
 
     try {
 
       const res = await API.put(
 
-        `/tasks/${id}`,
-
-        data
+        `/notifications/${id}/read`
 
       );
 
@@ -85,7 +50,7 @@ export const taskService = {
     } catch (error) {
 
       console.error(
-        "Update Task Error:",
+        "Mark As Read Error:",
         error
       );
 
@@ -96,18 +61,16 @@ export const taskService = {
   },
 
   /* ====================================== */
-  /* MOVE TASK */
+  /* MARK ALL AS READ */
   /* ====================================== */
 
-  move: async (id, data) => {
+  markAllAsRead: async () => {
 
     try {
 
       const res = await API.put(
 
-        `/tasks/${id}/move`,
-
-        data
+        "/notifications/read-all"
 
       );
 
@@ -116,7 +79,7 @@ export const taskService = {
     } catch (error) {
 
       console.error(
-        "Move Task Error:",
+        "Mark All As Read Error:",
         error
       );
 
@@ -127,7 +90,7 @@ export const taskService = {
   },
 
   /* ====================================== */
-  /* DELETE TASK */
+  /* DELETE NOTIFICATION */
   /* ====================================== */
 
   remove: async (id) => {
@@ -136,7 +99,7 @@ export const taskService = {
 
       const res = await API.delete(
 
-        `/tasks/${id}`
+        `/notifications/${id}`
 
       );
 
@@ -145,7 +108,7 @@ export const taskService = {
     } catch (error) {
 
       console.error(
-        "Delete Task Error:",
+        "Delete Notification Error:",
         error
       );
 
